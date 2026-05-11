@@ -14,7 +14,9 @@ func (h *Handler) GetCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := dto.GetCategoriesResponse{}
+	response := dto.GetCategoriesResponse{
+		Categories: make([]dto.GetCategoryResponse, 0),
+	}
 
 	for _, category := range categories {
 		responseCategory := dto.GetCategoryResponse{
@@ -59,5 +61,5 @@ func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   &category.CreatedAt,
 	}
 
-	respondJSON(w, http.StatusOK, response)
+	respondJSON(w, http.StatusCreated, response)
 }

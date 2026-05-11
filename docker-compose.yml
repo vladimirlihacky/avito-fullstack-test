@@ -9,6 +9,8 @@ services:
     env_file: ./.env      
     ports:
       - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   migrate:
     image: migrate/migrate
@@ -31,15 +33,17 @@ services:
       database:
         condition: service_healthy
     ports:
-      - "${BACKEND_PORT:-8000}:${BACKEND_PORT}"
+      - "${BACKEND_PORT:-8080}:${BACKEND_PORT}"
     env_file: ./.env
     environment: 
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${DATABASE_PORT}/${POSTGRES_DB}?sslmode=disable"
 
-  client:
-    build:
-      context: ./client
-      target: run
-    ports:
-      - "${CLIENT_PORT:-3000}:${CLIENT_PORT}"
-    env_file: ./.env
+  # client:
+  #   build:
+  #     context: ./client
+  #     target: run
+  #   ports:
+  #     - "${CLIENT_PORT:-3000}:${CLIENT_PORT}"
+  #   env_file: ./.env
+volumes:
+  postgres_data:

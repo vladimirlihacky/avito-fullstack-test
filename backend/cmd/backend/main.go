@@ -12,7 +12,16 @@ import (
 )
 
 func main() {
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		panic("No database url provided")
+	}
+	JWTSecret := os.Getenv("JWT_SECRET")
+	if JWTSecret == "" {
+		JWTSecret = "secret"
+	}
+
+	pool, err := pgxpool.New(context.Background(), dbURL)
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +34,7 @@ func main() {
 
 	llmProvider := mock.NewProvider()
 
-	authService := service.NewAuthService(userRepo, "secret")
+	authService := service.NewAuthService(userRepo, JWTSecret)
 	categoryService := service.NewCategoryService(categoryRepo)
 	runService := service.NewRunService(runRepo, assistantRepo, llmProvider)
 	assistantService := service.NewAssistantService(assistantRepo, categoryRepo)

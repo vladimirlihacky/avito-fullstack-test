@@ -24,7 +24,7 @@ type GetRunResponse struct {
 	ID            string           `json:"id"`
 	AssistantID   string           `json:"assistantId"`
 	AssistantName string           `json:"assistantName"`
-	CategoryId    string           `json:"categoryId"`
+	CategoryID    string           `json:"categoryId"`
 	CategoryName  string           `json:"categoryName"`
 	UserID        string           `json:"userId"`
 	Model         string           `json:"model"`

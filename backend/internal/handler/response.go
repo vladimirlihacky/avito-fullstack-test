@@ -10,7 +10,7 @@ import (
 
 type ErrorDetail struct {
 	Code    string `json:"code"`
-	Message any    `json:"message"`
+	Message string `json:"message"`
 }
 
 type ErrorResponse struct {

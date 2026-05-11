@@ -4,13 +4,13 @@ import "time"
 
 type GetAssistantsRequest struct {
 	RequestPagination
-	CategoryId      string `validate:"uuid4"`
-	Search          string
+	CategoryID      *string `validate:"omitempty,uuid4"`
+	Search          *string
 	IncludeInactive bool
 }
 
 type CreateAssistantRequest struct {
-	CategoryId        string  `json:"categoryId" validate:"required,uuid4"`
+	CategoryID        string  `json:"categoryId" validate:"required,uuid4"`
 	Name              string  `json:"name" validate:"required"`
 	Description       string  `json:"description" validate:"required"`
 	Model             string  `json:"model" validate:"required"`
@@ -20,12 +20,12 @@ type CreateAssistantRequest struct {
 }
 
 type GetAssistantRequest struct {
-	AssistantId string `validate:"required,uuid4"`
+	AssistantID string `validate:"required,uuid4"`
 }
 
 type UpdateAssistantRequest struct {
-	AssistantId       string  `validate:"required,uuid4"`
-	CategoryId        string  `json:"categoryId" validate:"required,uuid4"`
+	AssistantID       string  `validate:"required,uuid4"`
+	CategoryID        string  `json:"categoryId" validate:"required,uuid4"`
 	Name              string  `json:"name" validate:"required"`
 	Description       string  `json:"description" validate:"required"`
 	Model             string  `json:"model" validate:"required"`
@@ -35,8 +35,8 @@ type UpdateAssistantRequest struct {
 }
 
 type GetAssistantResponse struct {
-	Id                string    `json:"id"`
-	CategoryId        string    `json:"categoryId"`
+	ID                string    `json:"id"`
+	CategoryID        string    `json:"categoryId"`
 	CategoryName      string    `json:"categoryName,omitempty"`
 	Name              string    `json:"name"`
 	Description       string    `json:"description"`

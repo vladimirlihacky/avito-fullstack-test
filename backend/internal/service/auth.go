@@ -15,11 +15,6 @@ type userRepo interface {
 	Create(ctx context.Context, user *domain.User, passwordHash string) error
 }
 
-type Token struct {
-	Token string
-	User  *domain.User
-}
-
 type AuthService struct {
 	userRepo userRepo
 	secret   string
@@ -32,7 +27,7 @@ func NewAuthService(userRepo userRepo, secret string) *AuthService {
 	}
 }
 
-func (s *AuthService) DummyLogin(role domain.Role) (*Token, error) {
+func (s *AuthService) DummyLogin(role domain.Role) (*domain.Token, error) {
 	user, err := auth.GetDummyUser(role)
 	if err != nil {
 		return nil, domain.ErrInvalidRequest
@@ -43,10 +38,10 @@ func (s *AuthService) DummyLogin(role domain.Role) (*Token, error) {
 		return nil, err
 	}
 
-	return &Token{Token: token, User: &user}, nil
+	return &domain.Token{Token: token, User: &user}, nil
 }
 
-func (s *AuthService) Register(ctx context.Context, email, password string) (*Token, error) {
+func (s *AuthService) Register(ctx context.Context, email, password string) (*domain.Token, error) {
 	_, _, err := s.userRepo.FindByEmail(ctx, email)
 	if err == nil {
 		return nil, domain.ErrUserExists
@@ -70,10 +65,10 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (*To
 	if err != nil {
 		return nil, err
 	}
-	return &Token{Token: token, User: user}, nil
+	return &domain.Token{Token: token, User: user}, nil
 }
 
-func (s *AuthService) Login(ctx context.Context, email, password string) (*Token, error) {
+func (s *AuthService) Login(ctx context.Context, email, password string) (*domain.Token, error) {
 	user, passwordHash, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -84,7 +79,7 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*Token
 
 	token, err := auth.GenerateToken(user.ID, user.Role, s.secret)
 
-	return &Token{
+	return &domain.Token{
 		Token: token,
 		User:  user,
 	}, err
