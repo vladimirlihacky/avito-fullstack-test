@@ -3,6 +3,7 @@ package service
 import (
 	"backend/internal/domain"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -50,7 +51,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 		return nil, err
 	}
 
-	llmCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	llmCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	resp, err := s.llmProvider.Complete(llmCtx, domain.LLMRequest{
@@ -63,7 +64,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 		run.Status = domain.RunStatusFailed
 		run.Error = &errMsg
 		if updateErr := s.runRepo.Update(ctx, run); updateErr != nil {
-			return nil, updateErr
+			fmt.Printf("LLM run update status fail: %v", updateErr)
 		}
 		return run, domain.ErrLLMProvider
 	}

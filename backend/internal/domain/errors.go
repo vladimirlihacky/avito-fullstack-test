@@ -9,4 +9,5 @@ var (
 	ErrAssistantInactive = errors.New("assistant is inactive")
 	ErrLLMProvider       = errors.New("LLM provider error")
 	ErrInvalidRole       = errors.New("invalid role")
+	ErrCategoryNotFound  = errors.New("category not found")
 )

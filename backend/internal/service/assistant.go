@@ -39,7 +39,7 @@ func (s *AssistantService) Create(ctx context.Context, assistant *domain.Assista
 		return nil, domain.ErrInvalidRequest
 	}
 	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
-		return nil, domain.ErrInvalidRequest
+		return nil, domain.ErrCategoryNotFound
 	}
 
 	if err := s.assistantRepo.Create(ctx, assistant); err != nil {
@@ -56,6 +56,9 @@ func (s *AssistantService) GetByID(ctx context.Context, id uuid.UUID) (*domain.A
 func (s *AssistantService) Update(ctx context.Context, assistant *domain.Assistant) (*domain.Assistant, error) {
 	if assistant.SystemPrompt == "" {
 		return nil, domain.ErrInvalidRequest
+	}
+	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
+		return nil, domain.ErrCategoryNotFound
 	}
 	if err := s.assistantRepo.Update(ctx, assistant); err != nil {
 		return nil, err

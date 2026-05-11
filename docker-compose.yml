@@ -10,6 +10,19 @@ services:
     ports:
       - "${DATABASE_PORT:-5432}:5432"
 
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./backend/migrations:/migrations
+    command: 
+      - -path=/migrations/
+      - -database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${DATABASE_PORT}/${POSTGRES_DB}?sslmode=disable
+      - up
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file: ./.env
+
   backend:
     build:
       context: ./backend
@@ -20,6 +33,8 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:${BACKEND_PORT}"
     env_file: ./.env
+    environment: 
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${DATABASE_PORT}/${POSTGRES_DB}?sslmode=disable"
 
   client:
     build:

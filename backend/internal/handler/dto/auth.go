@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type DummyLoginRequest struct {
 	Role string `json:"role" validate:"required,oneof=admin user"`
 }
@@ -14,32 +16,14 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
-type DummyLoginResponse struct {
-	Token string `json:"token"`
-	User  struct {
-		ID        string `json:"id"`
-		Email     string `json:"email"`
-		Role      string `json:"role"`
-		CreatedAt string `json:"createdAt"`
-	} `json:"user"`
-}
-
-type RegisterResponse struct {
-	Token string `json:"token"`
-	User  struct {
-		ID        string `json:"id"`
-		Email     string `json:"email"`
-		Role      string `json:"role"`
-		CreatedAt string `json:"createdAt"`
-	} `json:"user"`
+type LoginResponseUserData struct {
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
-	User  struct {
-		ID        string `json:"id"`
-		Email     string `json:"email"`
-		Role      string `json:"role"`
-		CreatedAt string `json:"createdAt"`
-	} `json:"user"`
+	Token string                `json:"token"`
+	User  LoginResponseUserData `json:"user"`
 }

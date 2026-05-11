@@ -1,9 +1,12 @@
 package dto
 
-import "backend/internal/domain"
+import (
+	"backend/internal/domain"
+	"time"
+)
 
 type CreateRunRequest struct {
-	AssistantID string `json:"assistantId" validate:"required,uuid4"`
+	AssistantID string `validate:"required,uuid4"`
 	UserPrompt  string `json:"userPrompt" validate:"required"`
 }
 
@@ -26,10 +29,10 @@ type GetRunResponse struct {
 	UserID        string           `json:"userId"`
 	Model         string           `json:"model"`
 	UserPrompt    string           `json:"userPrompt"`
-	Output        string           `json:"output"`
+	Output        *string          `json:"output,omitempty"`
 	Status        domain.RunStatus `json:"status"`
-	Error         string           `json:"error,omitempty"`
-	CreatedAt     string           `json:"createdAt"`
+	Error         *string          `json:"error,omitempty"`
+	CreatedAt     time.Time        `json:"createdAt"`
 }
 
 type UserGetRunsResponse struct {
