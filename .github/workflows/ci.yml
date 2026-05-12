@@ -27,11 +27,10 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
-          go-version: '1.26.1'
+          go-version: 1.26.1
           cache-dependency-path: backend/go.sum
 
       - name: Run unit tests
@@ -53,13 +52,14 @@ jobs:
   lint-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
-      - uses: golangci/golangci-lint-action@v4
+          go-version: 1.26.1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
         with:
-          working-directory: backend
+          version: v2.12
 
   build:
     runs-on: ubuntu-latest
@@ -73,4 +73,4 @@ jobs:
           sleep 5
           curl -f http://localhost:8080/_info
       - name: Teardown
-        run: docker-compose down -v
+        run: docker compose down -v
