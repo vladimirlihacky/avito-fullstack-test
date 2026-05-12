@@ -44,7 +44,10 @@ func main() {
 		authService,
 		categoryService,
 		assistantService,
+		JWTSecret,
 	)
 	h.SetupRoutes()
-	h.Listen(":8080")
+	if err := h.Listen(":8080"); err != nil {
+		panic(err)
+	}
 }

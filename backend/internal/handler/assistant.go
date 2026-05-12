@@ -35,6 +35,10 @@ func (h *Handler) GetAssistants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if claims.Role != domain.RoleAdmin {
+		req.IncludeInactive = false
+	}
+
 	assistantFilter := domain.AssistantFilter{
 		Pagination: domain.Pagination{
 			Page:     req.Page,
@@ -50,10 +54,6 @@ func (h *Handler) GetAssistants(w http.ResponseWriter, r *http.Request) {
 
 	if req.Search != nil {
 		assistantFilter.Search = *req.Search
-	}
-
-	if claims.Role != domain.RoleAdmin {
-		req.IncludeInactive = false
 	}
 
 	assistants, total, err := h.assistantService.GetAll(r.Context(), assistantFilter)
