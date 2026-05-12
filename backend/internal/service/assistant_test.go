@@ -61,6 +61,37 @@ func TestAssistantService_GetAll(t *testing.T) {
 
 	mockAssistantRepo.AssertExpectations(t)
 }
+func TestAssistantService_GetAll_FilterByCategory(t *testing.T) {
+        mockAssistantRepo := new(MockAssistantRepo)
+        mockCategoryRepo := new(MockCategoryRepo)
+
+        assistantService := service.NewAssistantService(
+                mockAssistantRepo,
+                mockCategoryRepo,
+        )
+
+        ctx := context.Background()
+        categoryID := uuid.New()
+        filter := domain.AssistantFilter{
+                CategoryID: &categoryID,
+        }
+
+        expected := []*domain.Assistant{
+                {ID: uuid.New(), CategoryID: categoryID},
+        }
+
+        mockAssistantRepo.On("List", ctx, filter).Return(expected, 1, nil)
+
+        result, total, err := assistantService.GetAll(ctx, filter)
+
+        assert.NoError(t, err)
+        assert.Equal(t, 1, total)
+        assert.Len(t, result, 1)
+        assert.Equal(t, categoryID, result[0].CategoryID)
+
+        mockAssistantRepo.AssertExpectations(t)
+}
+
 
 func TestAssistantService_Create(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)

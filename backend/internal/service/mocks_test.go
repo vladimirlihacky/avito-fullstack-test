@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mock Repositories
 type MockUserRepo struct {
 	mock.Mock
 }
@@ -123,12 +122,10 @@ func (m *MockLLMProvider) Complete(ctx context.Context, req domain.LLMRequest) (
 	return args.Get(0).(domain.LLMResponse), args.Error(1)
 }
 
-// Helper function to create string pointer
 func ptrStr(s string) *string {
 	return &s
 }
 
-// Helper function to generate UUID for tests
 func getMockUUID() uuid.UUID {
 	return uuid.New()
 }
