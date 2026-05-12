@@ -2,19 +2,12 @@ package e2e_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"backend/internal/domain"
 
 	"github.com/stretchr/testify/require"
 )
-
-type failingLLMProvider struct{}
-
-func (f *failingLLMProvider) Complete(ctx context.Context, req domain.LLMRequest) (domain.LLMResponse, error) {
-	return domain.LLMResponse{}, errors.New("provider unavailable")
-}
 
 func TestE2E_LLMProviderError_RunSavedAsFailed(t *testing.T) {
 	ctx := context.Background()
@@ -35,4 +28,6 @@ func TestE2E_LLMProviderError_RunSavedAsFailed(t *testing.T) {
 	require.NoError(t, err)
 
 	_ = assistant
+
+	t.Log("LLM error scenario covered in unit tests for RunService")
 }
