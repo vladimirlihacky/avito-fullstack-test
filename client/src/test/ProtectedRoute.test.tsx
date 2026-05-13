@@ -4,11 +4,11 @@ import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import { AuthProvider } from '../context/AuthContext'
 import { ProtectedRoute } from '../components/ProtectedRoute'
 
-mock.module("@tanstack/react-router", () => {
+mock.module('@tanstack/react-router', () => {
   return {
-    useNavigate: () => mock(), 
-  };
-});
+    useNavigate: () => mock(),
+  }
+})
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     localStorage.clear()

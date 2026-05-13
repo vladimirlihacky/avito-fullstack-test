@@ -42,7 +42,9 @@ export default function Header() {
               <Link
                 to="/runs/my"
                 className={`text-sm font-medium transition-colors ${
-                  isActive('/runs/my') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  isActive('/runs/my')
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 My Runs
@@ -75,7 +77,9 @@ export default function Header() {
                   <Link
                     to="/admin/runs"
                     className={`text-sm font-medium transition-colors ${
-                      isActive('/admin/runs') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                      isActive('/admin/runs')
+                        ? 'text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     All Runs
@@ -88,7 +92,9 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <div className="text-sm">
               <p className="font-medium">{user?.email}</p>
-              <p className="text-muted-foreground text-xs capitalize">{user?.role}</p>
+              <p className="text-muted-foreground text-xs capitalize">
+                {user?.role}
+              </p>
             </div>
             <Button onClick={handleLogout} variant="outline" size="sm">
               Logout

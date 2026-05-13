@@ -12,9 +12,9 @@ import type { Assistant, Category } from '@/api/types'
 import type { AuthUser } from '@/context/AuthContext'
 
 const searchSchema = z.object({
-  page:         z.number().int().min(1).catch(1),
-  categoryId:   z.string().optional().catch(undefined),
-  q:            z.string().optional().catch(undefined),
+  page: z.number().int().min(1).catch(1),
+  categoryId: z.string().optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
   showInactive: z.boolean().optional().catch(undefined),
 })
 
@@ -23,72 +23,87 @@ export const Route = createFileRoute('/assistants/')({
   component: AssistantsPage,
 })
 
-const SearchInput = memo(({ defaultValue, onChange }: {
-  defaultValue: string
-  onChange: (v: string) => void
-}) => {
-  const [value, setValue] = useState(defaultValue)
+const SearchInput = memo(
+  ({
+    defaultValue,
+    onChange,
+  }: {
+    defaultValue: string
+    onChange: (v: string) => void
+  }) => {
+    const [value, setValue] = useState(defaultValue)
 
-  useEffect(() => {
-    const timer = setTimeout(() => onChange(value), 300)
-    return () => clearTimeout(timer)
-  }, [value])
+    useEffect(() => {
+      const timer = setTimeout(() => onChange(value), 300)
+      return () => clearTimeout(timer)
+    }, [value])
 
-  return (
-    <Input
-      value={value}
-      placeholder="Search by name or description"
-      onChange={(e) => setValue(e.target.value)}
-    />
-  )
-})
-
-const AssistantsList = memo(({ assistants, user }: {
-  assistants: Assistant[]
-  user: AuthUser | null
-}) => {
-  if (!assistants.length) {
     return (
-      <Card>
-        <CardContent className="py-8 text-sm text-muted-foreground">
-          No assistants found for current filters.
-        </CardContent>
-      </Card>
+      <Input
+        value={value}
+        placeholder="Search by name or description"
+        onChange={(e) => setValue(e.target.value)}
+      />
     )
-  }
+  },
+)
 
-  return (
-    <div className="grid gap-4">
-      {assistants.map((assistant) => (
-        <Card key={assistant.id}>
-          <CardHeader>
-            <CardTitle>{assistant.name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{assistant.description}</p>
-            <div className="mt-4 flex gap-2">
-              <Button asChild>
-                <Link to="/assistants/$assistantId" params={{ assistantId: assistant.id }}>
-                  View details
-                </Link>
-              </Button>
-              {user?.role === 'admin' && (
-                <Button variant="outline" asChild>
-                  <Link
-                    to="/admin/assistants/$assistantId/edit"
-                    params={{ assistantId: assistant.id }}
-                  >
-                    Edit
-                  </Link>
-                </Button>
-              )}
-            </div>
+const AssistantsList = memo(
+  ({
+    assistants,
+    user,
+  }: {
+    assistants: Assistant[]
+    user: AuthUser | null
+  }) => {
+    if (!assistants.length) {
+      return (
+        <Card>
+          <CardContent className="py-8 text-sm text-muted-foreground">
+            No assistants found for current filters.
           </CardContent>
         </Card>
-      ))}
-    </div>
-  )
-})
+      )
+    }
+
+    return (
+      <div className="grid gap-4">
+        {assistants.map((assistant) => (
+          <Card key={assistant.id}>
+            <CardHeader>
+              <CardTitle>{assistant.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                {assistant.description}
+              </p>
+              <div className="mt-4 flex gap-2">
+                <Button asChild>
+                  <Link
+                    to="/assistants/$assistantId"
+                    params={{ assistantId: assistant.id }}
+                  >
+                    View details
+                  </Link>
+                </Button>
+                {user?.role === 'admin' && (
+                  <Button variant="outline" asChild>
+                    <Link
+                      to="/admin/assistants/$assistantId/edit"
+                      params={{ assistantId: assistant.id }}
+                    >
+                      Edit
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  },
+)
 
 function AssistantsPageContent() {
   const pageSize = 10
@@ -168,7 +183,9 @@ function AssistantsPageContent() {
             <select
               className="h-9 rounded-md border px-2"
               value={categoryId ?? ''}
-              onChange={(e) => handleCategoryChange(e.target.value || undefined)}
+              onChange={(e) =>
+                handleCategoryChange(e.target.value || undefined)
+              }
             >
               <option value="">All categories</option>
               {categories.map((c) => (
@@ -181,10 +198,7 @@ function AssistantsPageContent() {
 
           <div className="flex flex-col gap-1 grow min-w-60">
             <div className="text-sm font-medium">Search</div>
-            <SearchInput
-              defaultValue={q ?? ''}
-              onChange={handleQChange}
-            />
+            <SearchInput defaultValue={q ?? ''} onChange={handleQChange} />
           </div>
 
           {user?.role === 'admin' && (
@@ -218,7 +232,9 @@ function AssistantsPage() {
   return (
     <ProtectedRoute>
       <div className="flex h-[calc(100vh-1rem)] flex-col p-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Assistants catalog</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Assistants catalog
+        </h1>
         <AssistantsPageContent />
       </div>
     </ProtectedRoute>
