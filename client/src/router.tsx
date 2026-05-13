@@ -9,11 +9,11 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: 'intent',
-    context: { queryClient }
+    context: { queryClient },
   })
 
   setupRouterSsrQueryIntegration({
-    router, 
+    router,
     queryClient,
   })
 

@@ -21,7 +21,7 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 
 	loginResult, err := h.authService.DummyLogin(domain.Role(req.Role))
 	if err != nil {
-		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")
+		respondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized")
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	loginResult, err := h.authService.Login(r.Context(), req.Email, req.Password)
 	if err != nil {
-		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")
+		respondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized")
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	loginResult, err := h.authService.Register(r.Context(), req.Email, req.Password)
 	if err != nil {
-		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")
+		respondError(w, http.StatusBadGateway, "UNAUTHORIZED", "UNAUTHORIZED")
 		return
 	}
 

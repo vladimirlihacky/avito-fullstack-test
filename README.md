@@ -1,10 +1,8 @@
-# AI Assistants Catalog — Backend
+# AI Assistants Catalog — Fullstack
 
 ## О проекте
 
-Репозиторий содержит backend-сервис для каталога AI-ассистентов. Backend реализован на Go с PostgreSQL, JWT-авторизацией и мокируемым LLM-провайдером.
-
-> Frontend пока не реализован. README описывает текущую backend-часть и как её запустить.
+Репозиторий содержит backend-сервис для каталога AI-ассистентов (Go + PostgreSQL + JWT + мокируемый LLM) и frontend SPA на React.
 
 ## Что работает
 
@@ -14,6 +12,7 @@
 - Категории ассистентов
 - CRUD ассистентов (создание, редактирование, получение, список)
 - Запуск ассистента и сохранение истории `runs`
+- Frontend SPA: `/login`, `/assistants`, `/assistants/:id`, `/runs/my`, админ-страницы
 - Mock LLM provider с детерминированным ответом
 - Авто-применение миграций при старте через Docker Compose
 - Тесты: unit + backend E2E
@@ -60,6 +59,11 @@ docker compose up --build
 
 ```text
 http://localhost:8080
+```
+
+Frontend доступен по адресу:
+```text
+http://localhost:3000
 ```
 
 ### 4. Проверка healthcheck
@@ -216,8 +220,7 @@ docker compose -f docker-compose.test.yml up --build --remove-orphans
 
 ## Ограничения и текущий статус
 
-- Frontend в этом репозитории пока не реализован.
-- `docker-compose.yml` содержит только backend и базу данных.
+- `docker-compose.yml` запускает backend, postgres и frontend.
 - Дополнительная регистрация по email/password есть в коде, но основной flow сейчас основан на `/dummyLogin`.
 
 ## Полезные файлы

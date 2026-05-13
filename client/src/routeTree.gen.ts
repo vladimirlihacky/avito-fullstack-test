@@ -9,19 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AssistantsRouteImport } from './routes/assistants'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AssistantsIndexRouteImport } from './routes/assistants/index'
+import { Route as RunsMyRouteImport } from './routes/runs/my'
+import { Route as AssistantsAssistantIdRouteImport } from './routes/assistants/$assistantId'
+import { Route as AdminRunsRouteImport } from './routes/admin/runs'
+import { Route as AdminCategoriesNewRouteImport } from './routes/admin/categories/new'
+import { Route as AdminAssistantsNewRouteImport } from './routes/admin/assistants/new'
+import { Route as AdminAssistantsAssistantIdEditRouteImport } from './routes/admin/assistants/$assistantId/edit'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssistantsRoute = AssistantsRouteImport.update({
-  id: '/assistants',
-  path: '/assistants',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -34,55 +35,139 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssistantsIndexRoute = AssistantsIndexRouteImport.update({
+  id: '/assistants/',
+  path: '/assistants/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RunsMyRoute = RunsMyRouteImport.update({
+  id: '/runs/my',
+  path: '/runs/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssistantsAssistantIdRoute = AssistantsAssistantIdRouteImport.update({
+  id: '/assistants/$assistantId',
+  path: '/assistants/$assistantId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRunsRoute = AdminRunsRouteImport.update({
+  id: '/admin/runs',
+  path: '/admin/runs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCategoriesNewRoute = AdminCategoriesNewRouteImport.update({
+  id: '/admin/categories/new',
+  path: '/admin/categories/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAssistantsNewRoute = AdminAssistantsNewRouteImport.update({
+  id: '/admin/assistants/new',
+  path: '/admin/assistants/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAssistantsAssistantIdEditRoute =
+  AdminAssistantsAssistantIdEditRouteImport.update({
+    id: '/admin/assistants/$assistantId/edit',
+    path: '/admin/assistants/$assistantId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/assistants': typeof AssistantsRoute
-  '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/admin/runs': typeof AdminRunsRoute
+  '/assistants/$assistantId': typeof AssistantsAssistantIdRoute
+  '/runs/my': typeof RunsMyRoute
+  '/assistants/': typeof AssistantsIndexRoute
+  '/admin/assistants/new': typeof AdminAssistantsNewRoute
+  '/admin/categories/new': typeof AdminCategoriesNewRoute
+  '/admin/assistants/$assistantId/edit': typeof AdminAssistantsAssistantIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/assistants': typeof AssistantsRoute
-  '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/admin/runs': typeof AdminRunsRoute
+  '/assistants/$assistantId': typeof AssistantsAssistantIdRoute
+  '/runs/my': typeof RunsMyRoute
+  '/assistants': typeof AssistantsIndexRoute
+  '/admin/assistants/new': typeof AdminAssistantsNewRoute
+  '/admin/categories/new': typeof AdminCategoriesNewRoute
+  '/admin/assistants/$assistantId/edit': typeof AdminAssistantsAssistantIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/assistants': typeof AssistantsRoute
-  '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/admin/runs': typeof AdminRunsRoute
+  '/assistants/$assistantId': typeof AssistantsAssistantIdRoute
+  '/runs/my': typeof RunsMyRoute
+  '/assistants/': typeof AssistantsIndexRoute
+  '/admin/assistants/new': typeof AdminAssistantsNewRoute
+  '/admin/categories/new': typeof AdminCategoriesNewRoute
+  '/admin/assistants/$assistantId/edit': typeof AdminAssistantsAssistantIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/assistants' | '/auth'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/login'
+    | '/admin/runs'
+    | '/assistants/$assistantId'
+    | '/runs/my'
+    | '/assistants/'
+    | '/admin/assistants/new'
+    | '/admin/categories/new'
+    | '/admin/assistants/$assistantId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/assistants' | '/auth'
-  id: '__root__' | '/' | '/about' | '/assistants' | '/auth'
+  to:
+    | '/'
+    | '/about'
+    | '/login'
+    | '/admin/runs'
+    | '/assistants/$assistantId'
+    | '/runs/my'
+    | '/assistants'
+    | '/admin/assistants/new'
+    | '/admin/categories/new'
+    | '/admin/assistants/$assistantId/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/login'
+    | '/admin/runs'
+    | '/assistants/$assistantId'
+    | '/runs/my'
+    | '/assistants/'
+    | '/admin/assistants/new'
+    | '/admin/categories/new'
+    | '/admin/assistants/$assistantId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AssistantsRoute: typeof AssistantsRoute
-  AuthRoute: typeof AuthRoute
+  LoginRoute: typeof LoginRoute
+  AdminRunsRoute: typeof AdminRunsRoute
+  AssistantsAssistantIdRoute: typeof AssistantsAssistantIdRoute
+  RunsMyRoute: typeof RunsMyRoute
+  AssistantsIndexRoute: typeof AssistantsIndexRoute
+  AdminAssistantsNewRoute: typeof AdminAssistantsNewRoute
+  AdminCategoriesNewRoute: typeof AdminCategoriesNewRoute
+  AdminAssistantsAssistantIdEditRoute: typeof AdminAssistantsAssistantIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assistants': {
-      id: '/assistants'
-      path: '/assistants'
-      fullPath: '/assistants'
-      preLoaderRoute: typeof AssistantsRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -99,14 +184,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assistants/': {
+      id: '/assistants/'
+      path: '/assistants'
+      fullPath: '/assistants/'
+      preLoaderRoute: typeof AssistantsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/runs/my': {
+      id: '/runs/my'
+      path: '/runs/my'
+      fullPath: '/runs/my'
+      preLoaderRoute: typeof RunsMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistants/$assistantId': {
+      id: '/assistants/$assistantId'
+      path: '/assistants/$assistantId'
+      fullPath: '/assistants/$assistantId'
+      preLoaderRoute: typeof AssistantsAssistantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/runs': {
+      id: '/admin/runs'
+      path: '/admin/runs'
+      fullPath: '/admin/runs'
+      preLoaderRoute: typeof AdminRunsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/categories/new': {
+      id: '/admin/categories/new'
+      path: '/admin/categories/new'
+      fullPath: '/admin/categories/new'
+      preLoaderRoute: typeof AdminCategoriesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/assistants/new': {
+      id: '/admin/assistants/new'
+      path: '/admin/assistants/new'
+      fullPath: '/admin/assistants/new'
+      preLoaderRoute: typeof AdminAssistantsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/assistants/$assistantId/edit': {
+      id: '/admin/assistants/$assistantId/edit'
+      path: '/admin/assistants/$assistantId/edit'
+      fullPath: '/admin/assistants/$assistantId/edit'
+      preLoaderRoute: typeof AdminAssistantsAssistantIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AssistantsRoute: AssistantsRoute,
-  AuthRoute: AuthRoute,
+  LoginRoute: LoginRoute,
+  AdminRunsRoute: AdminRunsRoute,
+  AssistantsAssistantIdRoute: AssistantsAssistantIdRoute,
+  RunsMyRoute: RunsMyRoute,
+  AssistantsIndexRoute: AssistantsIndexRoute,
+  AdminAssistantsNewRoute: AdminAssistantsNewRoute,
+  AdminCategoriesNewRoute: AdminCategoriesNewRoute,
+  AdminAssistantsAssistantIdEditRoute: AdminAssistantsAssistantIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

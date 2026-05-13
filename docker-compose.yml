@@ -43,5 +43,13 @@ services:
       BACKEND_PORT: "${BACKEND_PORT:-8080}"
       DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@database:5432/${POSTGRES_DB:-postgres}?sslmode=disable"
 
+  frontend:
+    build:
+      context: ./client
+    depends_on:
+      - backend
+    ports:
+      - "${CLIENT_PORT:-3000}:80"
+
 volumes:
   postgres_data:
