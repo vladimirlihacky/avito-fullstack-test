@@ -1,233 +1,164 @@
-# AI Assistants Catalog — Fullstack
+# AI Assistants Catalog
 
-## О проекте
+Fullstack-приложение для каталога AI-ассистентов. Backend на Go, frontend SPA на React.
 
-Репозиторий содержит backend-сервис для каталога AI-ассистентов (Go + PostgreSQL + JWT + мокируемый LLM) и frontend SPA на React.
+## Стек
 
-## Что работает
+**Backend:** Go · PostgreSQL · JWT · chi router  
+**Frontend:** BunJS · React 19 · TypeScript · TanStack Router · TanStack Query · Tailwind CSS · shadcn/ui  
+**Инфраструктура:** Docker Compose · nginx · GitHub Actions
 
-- REST API по спецификации `api.yml`
-- JWT-авторизация с тестовым `/dummyLogin`
-- Роли `admin` и `user`
-- Категории ассистентов
-- CRUD ассистентов (создание, редактирование, получение, список)
-- Запуск ассистента и сохранение истории `runs`
-- Frontend SPA: `/login`, `/assistants`, `/assistants/:id`, `/runs/my`, админ-страницы
-- Mock LLM provider с детерминированным ответом
-- Авто-применение миграций при старте через Docker Compose
-- Тесты: unit + backend E2E
-
-## Требования
-
-- Docker
-- Docker Compose
-- Go 1.26+
-- PostgreSQL (используется в контейнере)
-
-## Запуск
-
-### 1. Копируйте `.env.example` в `.env`
+## Быстрый старт
 
 ```bash
 cp .env.example .env
-```
-
-### 2. Проверьте значение порта
-
-Backend слушает порт `8080` внутри контейнера.
-В `.env.example` указано:
-
-```env
-BACKEND_PORT=8000
-```
-
-Для корректной работы убедитесь, что переменная установлена так:
-
-```env
-BACKEND_PORT=8080
-```
-
-Если используется Docker Compose без `.env`, порт по умолчанию будет `8080`.
-
-### 3. Запуск сервиса
-
-```bash
 docker compose up --build
 ```
 
-После запуска backend доступен по адресу:
+| Сервис   | Адрес                   |
+|----------|-------------------------|
+| Frontend | http://localhost:3000   |
+| Backend  | http://localhost:8080   |
 
-```text
-http://localhost:8080
-```
-
-Frontend доступен по адресу:
-```text
-http://localhost:3000
-```
-
-### 4. Проверка healthcheck
+Healthcheck:
 
 ```bash
 curl http://localhost:8080/_info
 ```
 
-Ожидаемый ответ: `200 OK`
+## Переменные окружения
 
-## Структура базы данных
+Все переменные описаны в `.env.example`. Значимые:
 
-Миграции находятся в `backend/migrations`.
+| Переменная          | По умолчанию | Описание                        |
+|---------------------|--------------|---------------------------------|
+| `BACKEND_PORT`      | `8080`       | Порт backend внутри контейнера  |
+| `CLIENT_PORT`       | `3000`       | Внешний порт frontend           |
+| `DATABASE_PORT`     | `5432`       | Внешний порт PostgreSQL         |
+| `JWT_SECRET`        | `secret`     | Секрет для подписи JWT          |
+| `POSTGRES_USER`     | `postgres`   |                                 |
+| `POSTGRES_PASSWORD` | `password`   |                                 |
+| `POSTGRES_DB`       | `postgres`   |                                 |
 
-Схема включает:
+## Авторизация
 
-- `users` — пользователи (admin/user)
-- `categories` — категории ассистентов
-- `assistants` — ассистенты каталога
-- `runs` — история запусков ассистентов
-
-Индексы:
-
-- `idx_assistants_category_id`
-- `idx_assistants_is_active`
-- `idx_assistants_search`
-- `idx_runs_user_id_created_at`
-- `idx_runs_assistant_id`
-- `idx_runs_status`
-
-## Dummy login и тестовые пользователи
-
-Для тестирования используется `/dummyLogin`.
-Токены выдаются для фиксированных UUID:
-
-- admin: `00000000-0000-0000-0000-000000000001`
-- user: `00000000-0000-0000-0000-000000000002`
-
-Пример запроса:
+Используется `/dummyLogin` — выдаёт JWT для фиксированных тестовых пользователей:
 
 ```bash
+# Получить токен администратора
 curl -X POST http://localhost:8080/dummyLogin \
   -H 'Content-Type: application/json' \
   -d '{"role":"admin"}'
+
+# Получить токен пользователя
+curl -X POST http://localhost:8080/dummyLogin \
+  -H 'Content-Type: application/json' \
+  -d '{"role":"user"}'
 ```
 
-Ответ содержит JWT и данные пользователя.
+Тестовые UUID: admin — `00000000-0000-0000-0000-000000000001`, user — `00000000-0000-0000-0000-000000000002`.
 
 ## API
 
-### Public
-- `GET /_info` — healthcheck
-- `POST /dummyLogin` — получить тестовый JWT
+### Публичные
 
-### Protected (Bearer JWT)
-- `GET /categories`
-- `POST /categories` — admin
-- `GET /assistants`
-- `POST /assistants` — admin
-- `GET /assistants/{assistantId}`
-- `PUT /assistants/{assistantId}` — admin
-- `POST /assistants/{assistantId}/run`
-- `GET /runs/my`
-- `GET /admin/runs` — admin
+| Метод | Путь          | Описание        |
+|-------|---------------|-----------------|
+| GET   | `/_info`      | Healthcheck     |
+| POST  | `/dummyLogin` | Получить JWT    |
+| POST  | `/login`      | Логин           |
+| POST  | `/register`   | Регистрация     |
 
-### Пример использования
+### Защищённые (Bearer JWT)
 
-Получение списка ассистентов:
+| Метод | Путь                            | Роль    | Описание                      |
+|-------|---------------------------------|---------|-------------------------------|
+| GET   | `/categories`                   | any     | Список категорий              |
+| POST  | `/categories`                   | admin   | Создать категорию             |
+| GET   | `/assistants`                   | any     | Список ассистентов            |
+| POST  | `/assistants`                   | admin   | Создать ассистента            |
+| GET   | `/assistants/:id`               | any     | Карточка ассистента           |
+| PUT   | `/assistants/:id`               | admin   | Обновить ассистента           |
+| POST  | `/assistants/:id/run`           | any     | Запустить ассистента          |
+| GET   | `/runs/my`                      | any     | Мои запуски                   |
+| GET   | `/admin/runs`                   | admin   | Все запуски                   |
 
-```bash
-curl "http://localhost:8080/assistants?page=1&pageSize=10&q=повар&categoryId=<uuid>" \
-  -H "Authorization: Bearer <token>"
-```
+Параметры фильтрации `GET /assistants`: `page`, `pageSize`, `q` (полнотекстовый поиск), `categoryId`, `includeInactive` (только admin).
 
-Запуск ассистента:
+## Архитектурные решения
 
-```bash
-curl -X POST http://localhost:8080/assistants/<assistantId>/run \
-  -H "Authorization: Bearer <token>" \
-  -H 'Content-Type: application/json' \
-  -d '{"userPrompt":"курица, рис, томаты"}'
-```
+### Backend
 
-## Mock LLM-провайдер
+Трёхслойная архитектура: `handler → service → repository`. Интерфейсы объявляются на стороне потребителя — сервисы не зависят от конкретных реализаций репозиториев и LLM-провайдера, что упрощает тестирование через моки.
 
-Реализация находится в `backend/internal/llm/mock/provider.go`.
+Доменные ошибки (`ErrNotFound`, `ErrAssistantInactive`, `ErrLLMProvider` и др.) объявлены в `domain/errors.go` и проверяются через `errors.Is` на уровне хендлеров — HTTP-статусы выставляются там, а не в бизнес-логике.
 
-Контракт provider:
+Системный промпт скрывается от роли `user` на уровне хендлера. Флаг `includeInactive` для не-admin принудительно сбрасывается там же.
+
+Полнотекстовый поиск по ассистентам реализован через `websearch_to_tsquery('russian', ...)` с GIN-индексом. История запусков индексирована по `(user_id, created_at DESC)`.
+
+### Frontend
+
+Чистый CSR SPA: TanStack Router (file-based routing, типобезопасные параметры) + TanStack Query (серверный стейт, кэширование, инвалидация). Глобальный стейт (токен, роль) — в `sessionStorage`
+
+API-слой разделён на три уровня: `fetcher` (HTTP + обработка ошибок) → `client` (доменные функции) → `hooks` (интеграция с React Query). Компоненты зависят только от хуков.
+
+QueryKeys организованы иерархически — инвалидация `assistants.all()` автоматически сбрасывает списки и детали.
+
+Запросы к backend проксируются через nginx (`/api/` → `http://backend:8080/`), поэтому в коде используется относительный базовый путь `/api` без хардкода хоста.
+
+### LLM Provider
+
+Интерфейс провайдера объявлен в домене:
 
 ```go
-type LLMRequest struct {
-    Model        string
-    SystemPrompt string
-    UserPrompt   string
+type LLMProvider interface {
+    Complete(ctx context.Context, req LLMRequest) (LLMResponse, error)
 }
 ```
 
-Mock отвечает детерминированно по шаблону:
+Текущая реализация — `mock`, отвечает детерминированно:
 
-```text
+```
 [mock] model=<model> | <userPrompt>
 ```
 
-Backend формирует запрос к LLM из следующих данных:
-
-- `assistant.Model`
-- `assistant.SystemPrompt`
-- `userPrompt` из тела запроса
-
-### Пример итогового запроса в LLM
-
-```json
-{
-  "model": "mock-smart",
-  "systemPrompt": "Составь подробный рецепт по ингредиентам.",
-  "userPrompt": "курица, рис, томаты"
-}
-```
+Для подключения OpenAI-совместимого провайдера достаточно реализовать интерфейс и переключить переменную `LLM_PROVIDER=openai` в окружении. Таймаут LLM-вызова — 30 секунд (задаётся через `context.WithTimeout` в `RunService`).
 
 ## Поведение запуска ассистента
 
-При создании запуска backend выполняет:
-
-1. Проверяет существование ассистента
-2. Проверяет, что ассистент активен
-3. Сохраняет запуск в БД со статусом `pending`
-4. Вызывает LLM provider с `systemPrompt`
-5. Если провайдер вернул ответ — переводит запуск в `success`
-6. Если произошла ошибка или таймаут — переводит запуск в `failed`
+1. Проверяется существование и активность ассистента
+2. Запуск сохраняется в БД со статусом `pending`
+3. Вызывается LLM provider с `model`, `systemPrompt`, `userPrompt`
+4. При успехе — статус `success`, результат сохраняется
+5. При ошибке или таймауте — статус `failed`, сообщение об ошибке сохраняется
 
 Все запуски сохраняются независимо от результата.
 
 ## Тесты
 
-### Запуск unit-тестов
-
 ```bash
-cd backend
-go test ./internal/...
-```
+# Unit-тесты backend
+cd backend && go test ./internal/... -v
 
-### Запуск E2E-тестов
+# E2E-тесты backend (требуют запущенный PostgreSQL)
+cd backend && go test ./tests/e2e/... -v -timeout 120s
 
-```bash
-cd backend
-go test ./tests/e2e/...
-```
-
-### Тесты через Docker Compose
-
-```bash
+# Тесты backend через Docker Compose (изолированная БД)
 docker compose -f docker-compose.test.yml up --build --remove-orphans
+
+# Тесты frontend
+cd client && bun test
 ```
 
-## Ограничения и текущий статус
+E2E-тест воспроизводит полный сценарий: создание ассистента администратором → запуск пользователем → проверка истории.
 
-- `docker-compose.yml` запускает backend, postgres и frontend.
-- Дополнительная регистрация по email/password есть в коде, но основной flow сейчас основан на `/dummyLogin`.
+## CI
 
-## Полезные файлы
+GitHub Actions запускает при каждом пуше и PR в `main`:
 
-- `backend/cmd/backend/main.go` — входная точка сервиса
-- `backend/internal/handler` — HTTP-обработчики
-- `backend/internal/service` — бизнес-логика
-- `backend/internal/repo/postgres` — доступ к базе
-- `backend/internal/llm/mock` — mock LLM provider
-- `backend/migrations` — SQL-миграции
+- **test-backend** — unit + E2E тесты с реальным PostgreSQL
+- **lint-backend** — golangci-lint
+- **test-frontend** — vitest + tsc --noEmit
+- **lint-frontend** — eslint + prettier
+- **build** — `docker compose up --build`, healthcheck `/_info` и фронтенда
