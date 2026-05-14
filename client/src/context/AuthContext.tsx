@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react'
 
 export type UserRole = 'admin' | 'user'
 
@@ -55,20 +62,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('auth_user')
   }, [])
 
-  const value = useMemo(() => ({
-    user,
-    token,
-    isAuthenticated: !!user && !!token,
-    login,
-    logout,
-  }), [user, token, login, logout])
-
-  return (
-    <AuthContext.Provider
-      value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      isAuthenticated: !!user && !!token,
+      login,
+      logout,
+    }),
+    [user, token, login, logout],
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
