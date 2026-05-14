@@ -8,6 +8,8 @@ Fullstack-приложение для каталога AI-ассистентов
 **Frontend:** BunJS · React 19 · TypeScript · TanStack Router · TanStack Query · Tailwind CSS · shadcn/ui  
 **Инфраструктура:** Docker Compose · nginx · GitHub Actions
 
+Bun использовал только для более быстрого билда и тестов, при желании проект легко полностью переносится на NodeJS
+
 ## Быстрый старт
 
 ```bash
