@@ -125,7 +125,9 @@ type LLMProvider interface {
 [mock] model=<model> | <userPrompt>
 ```
 
-Для подключения OpenAI-совместимого провайдера достаточно переключить переменную `LLM_PROVIDER=openai` в окружении, а также указать `OPENAI_BASE_URL`, `OPENAI_API_KEY`. Таймаут LLM-вызова — 30 секунд (задаётся через `context.WithTimeout` в `RunService`).
+Для подключения OpenAI-совместимого провайдера достаточно переключить переменную `LLM_PROVIDER=openai` в окружении, а также указать `OPENAI_BASE_URL`, `OPENAI_API_KEY`. Таймаут LLM-вызова — 30 секунд (задаётся через `context.WithTimeout` в `RunService`). 
+
+OpenAI-провайдер проверен на Groq и Gigachat
 
 ## Поведение запуска ассистента
 
