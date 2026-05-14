@@ -34,34 +34,30 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+const queryClient = new QueryClient()
+
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const queryClient = new QueryClient()
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body className="font-sans antialiased">
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <AppShell>{children}</AppShell>
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-              ]}
-            />
-          </QueryClientProvider>
-        </AuthProvider>
-        <Scripts />
-      </body>
-    </html>
+
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AppShell>{children}</AppShell>
+        {import.meta.env.DEV && (
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+        )}
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

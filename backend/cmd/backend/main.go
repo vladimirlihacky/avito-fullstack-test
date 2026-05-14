@@ -1,8 +1,10 @@
 package main
 
 import (
+	"backend/internal/domain"
 	"backend/internal/handler"
 	"backend/internal/llm/mock"
+	"backend/internal/llm/openai"
 	"backend/internal/repo/postgres"
 	"backend/internal/service"
 	"context"
@@ -32,7 +34,23 @@ func main() {
 	runRepo := postgres.NewRunRepo(pool)
 	categoryRepo := postgres.NewCategoryRepo(pool)
 
-	llmProvider := mock.NewProvider()
+	provider := os.Getenv("LLM_PROVIDER")
+	var llmProvider domain.LLMProvider
+	switch provider {
+	case "openai":
+		openaiBaseURL := os.Getenv("OPENAI_BASE_URL")
+		openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+
+		if openaiBaseURL == "" || openaiAPIKey == "" {
+			panic("OpenAI base URL and API key must be provided")
+		}
+		llmProvider = openai.NewProvider(
+			openaiBaseURL,
+			openaiAPIKey,
+		)
+	default:
+		llmProvider = mock.NewProvider()
+	}
 
 	authService := service.NewAuthService(userRepo, JWTSecret)
 	categoryService := service.NewCategoryService(categoryRepo)
