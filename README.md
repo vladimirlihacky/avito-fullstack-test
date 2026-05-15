@@ -215,6 +215,21 @@ k6 run backend/tests/load/test.js
 
 Скриншоты из Grafana во время тестирования:
 
+<img 
+  src="/.github/assets/grafana_tests_1.png"
+  alt="Grafana Dashboard 1"
+  width="500px"
+  />
+<img 
+  src="/.github/assets/grafana_tests_2.png"
+  alt="Grafana Dashboard 1"
+  width="500px"
+  />
+<img 
+  src="/.github/assets/k6.png"
+  alt="Grafana Dashboard 1"
+  width="500px"
+  />
 ## CI
 
 GitHub Actions запускает при каждом пуше и PR в `main`:
