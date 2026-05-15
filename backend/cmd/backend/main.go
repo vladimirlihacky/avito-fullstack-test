@@ -9,6 +9,8 @@ import (
 	"backend/internal/service"
 	"context"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -49,7 +51,17 @@ func main() {
 			openaiAPIKey,
 		)
 	default:
-		llmProvider = mock.NewProvider()
+		latency := os.Getenv("MOCK_LLM_LATENCY")
+		if latency == "" {
+			latency = "800"
+		}
+
+		latencyMs, err := strconv.Atoi(latency)
+		if err != nil {
+			panic("Invalid latency value")
+		}
+
+		llmProvider = mock.NewProvider(time.Duration(latencyMs) * time.Millisecond)
 	}
 
 	authService := service.NewAuthService(userRepo, JWTSecret)

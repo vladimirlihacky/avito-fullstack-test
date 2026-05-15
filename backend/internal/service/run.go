@@ -2,6 +2,7 @@ package service
 
 import (
 	"backend/internal/domain"
+	"backend/internal/metrics"
 	"context"
 	"fmt"
 	"time"
@@ -30,6 +31,11 @@ func NewRunService(runRepo runRepo, assistantRepo assistantRepo, llmProvider dom
 }
 
 func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID uuid.UUID, userPrompt string) (*domain.Run, error) {
+	metrics.RunAttempts.WithLabelValues(assistantID.String()).Inc()
+	metrics.ActiveRuns.Inc()
+	defer metrics.ActiveRuns.Dec()
+	startTime := time.Now()
+
 	assistant, err := s.assistantRepo.GetByID(ctx, assistantID)
 	if err != nil {
 		return nil, err
@@ -60,6 +66,8 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 		UserPrompt:   userPrompt,
 	})
 	if err != nil {
+		metrics.RunDuration.WithLabelValues("failed").Observe(time.Since(startTime).Seconds())
+
 		errMsg := err.Error()
 		run.Status = domain.RunStatusFailed
 		run.Error = &errMsg
@@ -75,6 +83,8 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 	if err := s.runRepo.Update(ctx, run); err != nil {
 		return nil, err
 	}
+
+	metrics.RunDuration.WithLabelValues("success").Observe(time.Since(startTime).Seconds())
 
 	return run, nil
 }

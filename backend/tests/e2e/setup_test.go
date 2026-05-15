@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"backend/internal/llm/mock"
 	"backend/internal/repo/postgres"
@@ -70,7 +71,7 @@ func buildServices(pool *pgxpool.Pool) *testServices {
 	assistantRepo := postgres.NewAssistantRepo(pool)
 	runRepo := postgres.NewRunRepo(pool)
 
-	llmProvider := mock.NewProvider()
+	llmProvider := mock.NewProvider(300 * time.Millisecond)
 
 	return &testServices{
 		categoryService: service.NewCategoryService(categoryRepo),

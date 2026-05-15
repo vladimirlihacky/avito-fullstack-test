@@ -7,15 +7,19 @@ import (
 	"time"
 )
 
-type Provider struct{}
+type Provider struct {
+	latency time.Duration
+}
 
-func NewProvider() *Provider {
-	return &Provider{}
+func NewProvider(latency time.Duration) *Provider {
+	return &Provider{
+		latency: latency,
+	}
 }
 
 func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) (domain.LLMResponse, error) {
 	select {
-	case <-time.After(300 * time.Millisecond):
+	case <-time.After(p.latency):
 	case <-ctx.Done():
 		return domain.LLMResponse{}, ctx.Err()
 	}

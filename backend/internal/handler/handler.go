@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type runService interface {
@@ -80,6 +81,7 @@ func (h *Handler) SetupRoutes() {
 
 	//System routes
 	r.Get("/_info", h.HealthCheck)
+	r.Handle("/metrics", promhttp.Handler())
 
 	//Auth routes
 	r.Post("/login", h.Login)
