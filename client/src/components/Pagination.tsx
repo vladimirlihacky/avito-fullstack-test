@@ -14,15 +14,15 @@ export default function Pagination({
   onPageChange,
 }: PaginationProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
-  const hasPrev = page > 1
-  const hasNext = page < totalPages
+  const isFirstPage = page === 1
+  const isLastPage = page === totalPages
 
   return (
     <div className="flex gap-2 items-center">
       <Button
         type="button"
         onClick={() => onPageChange(Math.max(1, page - 1))}
-        disabled={!hasPrev}
+        disabled={isFirstPage}
       >
         Previous
       </Button>
@@ -32,7 +32,7 @@ export default function Pagination({
       <Button
         type="button"
         onClick={() => onPageChange(page + 1)}
-        disabled={!hasNext}
+        disabled={isLastPage}
       >
         Next
       </Button>
