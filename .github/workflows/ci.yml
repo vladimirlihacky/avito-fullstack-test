@@ -109,3 +109,31 @@ jobs:
           curl -f http://localhost:8080/_info
       - name: Teardown
         run: docker compose down -v
+  
+  load-test:
+    runs-on: ubuntu-latest
+    needs: [build] 
+    
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Start Infrastructure
+        run: docker compose up --build -d
+
+      - name: Wait for Backend Readiness
+        run: |
+          echo "Waiting for backend to be healthy..."
+          for i in {1..10}; do
+            curl -s -f http://localhost:8080/_info && break
+            sleep 3
+          done
+
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: ./backend/tests/load/test.js 
+          flags: -u 10 --stage 10s:10 --stage 20s:20 --stage 10s:0
+
+      - name: Teardown
+        if: always() 
+        run: docker compose down -v

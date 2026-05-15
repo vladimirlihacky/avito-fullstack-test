@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
@@ -13,16 +13,36 @@ export const options = {
   },
 };
 
-export default function () {
-  const url = 'http://localhost:8080/assistants/0eb488cd-d611-4ca0-9e36-a045869cd3be/run';
+const BASE_URL = 'http://localhost:8080';
+const ASSISTANT_ID = '00000000-0000-0000-0000-000000000004';
+
+export function setup() {
+  const loginUrl = `${BASE_URL}/dummyLogin`;
+  const payload = JSON.stringify({ role: 'user' });
+
+  const res = http.post(loginUrl, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const token = res.json().token; 
+  
+  if (!token) {
+    throw new Error("Failed to get auth token!");
+  }
+
+  return { authToken: token };
+}
+
+export default function (data) {
+  const url = `${BASE_URL}/assistants/${ASSISTANT_ID}/run`;
   const payload = JSON.stringify({
-    userPrompt: 'USER PROMPT',
+    userPrompt: 'Hello, this is a load test prompt',
   });
 
   const params = {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAyIiwicm9sZSI6InVzZXIiLCJleHAiOjE3Nzk0NTY3OTEsImlhdCI6MTc3ODg1MTk5MX0.21EccXYLVIGy48dvmnokOixg6HOOVS3HCIU9uvboCXc',
+      'Authorization': `Bearer ${data.authToken}`, 
     },
   };
 
@@ -30,5 +50,8 @@ export default function () {
 
   check(res, {
     'status is 201': (r) => r.status === 201,
+    'has request id': (r) => r.json().id !== undefined,
   });
+
+  sleep(0.1);
 }

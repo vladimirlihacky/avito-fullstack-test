@@ -4,13 +4,13 @@ import "time"
 
 type GetAssistantsRequest struct {
 	RequestPagination
-	CategoryID      *string `validate:"omitempty,uuid4"`
+	CategoryID      *string `validate:"omitempty,uuid"`
 	Search          *string
 	IncludeInactive bool
 }
 
 type CreateAssistantRequest struct {
-	CategoryID        string  `json:"categoryId" validate:"required,uuid4"`
+	CategoryID        string  `json:"categoryId" validate:"required,uuid"`
 	Name              string  `json:"name" validate:"required"`
 	Description       string  `json:"description" validate:"required"`
 	Model             string  `json:"model" validate:"required"`
@@ -24,8 +24,8 @@ type GetAssistantRequest struct {
 }
 
 type UpdateAssistantRequest struct {
-	AssistantID       string  `validate:"required,uuid4"`
-	CategoryID        string  `json:"categoryId" validate:"required,uuid4"`
+	AssistantID       string  `validate:"required,uuid"`
+	CategoryID        string  `json:"categoryId" validate:"required,uuid"`
 	Name              string  `json:"name" validate:"required"`
 	Description       string  `json:"description" validate:"required"`
 	Model             string  `json:"model" validate:"required"`

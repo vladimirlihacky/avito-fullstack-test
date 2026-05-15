@@ -6,7 +6,7 @@ import (
 )
 
 type CreateRunRequest struct {
-	AssistantID string `validate:"required,uuid4"`
+	AssistantID string `validate:"required,uuid"`
 	UserPrompt  string `json:"userPrompt" validate:"required"`
 }
 
@@ -17,7 +17,7 @@ type UserGetRunsRequest struct {
 
 type AdminGetRunsRequest struct {
 	UserGetRunsRequest
-	AssistantID string `json:"assistantId,omitempty" validate:"omitempty,uuid4"`
+	AssistantID string `json:"assistantId,omitempty" validate:"omitempty,uuid"`
 }
 
 type GetRunResponse struct {
