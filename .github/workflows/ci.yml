@@ -9,7 +9,7 @@ on:
 
 jobs:
   test-backend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     services:
       postgres:
@@ -50,7 +50,7 @@ jobs:
           go tool cover -func=coverage-e2e.out
 
   lint-backend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -63,7 +63,7 @@ jobs:
           working-directory: backend
 
   test-frontend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -80,7 +80,7 @@ jobs:
         run: bunx tsc --noEmit
 
   lint-frontend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -97,7 +97,7 @@ jobs:
         run: bun run check
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [test-backend, test-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
         run: docker compose down -v
   
   load-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build] 
     
     steps:
@@ -130,10 +130,11 @@ jobs:
 
       - name: Run k6 Load Test
         run: |
+          NETWORK=$(docker network ls --format '{{.Name}}' | grep default | head -1)
           docker run --rm \
-            --network avito-fullstack-test_default \  
+            --network "$NETWORK" \
             -v ${{ github.workspace }}/backend/tests/load:/scripts \
-            -e BASE_URL=http://backend:8080 \          
+            -e BASE_URL=http://backend:8080 \
             grafana/k6 run /scripts/test.js \
             -u 10 --stage 10s:10 --stage 20s:20 --stage 10s:0
 
