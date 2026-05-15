@@ -1,7 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, mock } from 'bun:test'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { describe, it, expect, mock, afterEach } from 'bun:test'
 
 import Pagination from '../components/Pagination'
+
+afterEach(() => {
+  cleanup()
+})
 
 describe('Pagination', () => {
   it('disables Previous on first page and calls onPageChange on Next', () => {
