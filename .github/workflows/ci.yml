@@ -129,10 +129,13 @@ jobs:
           done
 
       - name: Run k6 Load Test
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: ./backend/tests/load/test.js 
-          flags: -u 10 --stage 10s:10 --stage 20s:20 --stage 10s:0
+        run: |
+          docker run --rm \
+            --network avito-fullstack-test_default \  
+            -v ${{ github.workspace }}/backend/tests/load:/scripts \
+            -e BASE_URL=http://backend:8080 \          
+            grafana/k6 run /scripts/test.js \
+            -u 10 --stage 10s:10 --stage 20s:20 --stage 10s:0
 
       - name: Teardown
         if: always() 
