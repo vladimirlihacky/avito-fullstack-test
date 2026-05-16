@@ -89,7 +89,58 @@ curl -X POST http://localhost:8080/dummyLogin \
 
 ## Архитектурные решения
 
+### Схема БД
+
+```mermaid
+erDiagram
+  users {
+    UUID id PK
+    VARCHAR email UK
+    user_role role
+    VARCHAR password_hash
+    TIMESTAMPTZ created_at
+  }
+  categories {
+    UUID id PK
+    VARCHAR name UK
+    TEXT description
+    TIMESTAMPTZ created_at
+  }
+  assistants {
+    UUID id PK
+    UUID category_id FK
+    VARCHAR name
+    TEXT description
+    VARCHAR model
+    TEXT system_prompt
+    TEXT example_user_prompt
+    BOOLEAN is_active
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+  runs {
+    UUID id PK
+    UUID assistant_id FK
+    UUID user_id FK
+    VARCHAR model
+    TEXT user_prompt
+    TEXT output
+    run_status status
+    TEXT error
+    TIMESTAMPTZ created_at
+  }
+  categories ||--o{ assistants : "category_id"
+  assistants ||--o{ runs : "assistant_id"
+  users ||--o{ runs : "user_id"
+```
+
 ### Backend
+
+<img 
+  src="/.github/assets/backend.png"
+  alt="Backend schema"
+  width="500px"
+  />
 
 Трёхслойная архитектура: `handler → service → repository`. Интерфейсы объявляются на стороне потребителя — сервисы не зависят от конкретных реализаций репозиториев и LLM-провайдера, что упрощает тестирование через моки.
 
