@@ -120,7 +120,7 @@ func (h *Handler) CreateAssistant(w http.ResponseWriter, r *http.Request) {
 
 	createdAssistant, err := h.assistantService.Create(r.Context(), assistant)
 	if err != nil {
-		if errors.Is(err, domain.ErrCategoryNotFound) {
+		if errors.Is(err, domain.ErrInvalidRequest) {
 			respondError(w, http.StatusBadRequest, "CATEGORY_NOT_FOUND", "Category not found")
 			return
 		}
@@ -222,7 +222,7 @@ func (h *Handler) UpdateAssistant(w http.ResponseWriter, r *http.Request) {
 
 	updatedAssistant, err := h.assistantService.Update(r.Context(), assistant)
 	if err != nil {
-		if errors.Is(err, domain.ErrCategoryNotFound) {
+		if errors.Is(err, domain.ErrInvalidRequest) {
 			respondError(w, http.StatusBadRequest, "CATEGORY_NOT_FOUND", "Category not found")
 			return
 		}

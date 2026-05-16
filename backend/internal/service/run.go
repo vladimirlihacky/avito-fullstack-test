@@ -38,7 +38,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 
 	assistant, err := s.assistantRepo.GetByID(ctx, assistantID)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrNotFound
 	}
 
 	if !assistant.IsActive {
@@ -54,7 +54,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 	}
 
 	if err := s.runRepo.Create(ctx, run); err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	llmCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -68,7 +68,8 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 	if err != nil {
 		metrics.RunDuration.WithLabelValues("failed").Observe(time.Since(startTime).Seconds())
 
-		errMsg := err.Error()
+		errMsg := domain.ErrLLMProvider.Error()
+
 		run.Status = domain.RunStatusFailed
 		run.Error = &errMsg
 		if updateErr := s.runRepo.Update(ctx, run); updateErr != nil {
@@ -81,7 +82,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 	run.Output = &resp.Output
 
 	if err := s.runRepo.Update(ctx, run); err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	metrics.RunDuration.WithLabelValues("success").Observe(time.Since(startTime).Seconds())
@@ -90,5 +91,11 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 }
 
 func (s *RunService) List(ctx context.Context, f domain.RunFilter) ([]*domain.Run, int, error) {
-	return s.runRepo.List(ctx, f)
+	runs, total, err := s.runRepo.List(ctx, f)
+
+	if err != nil {
+		return nil, 0, domain.ErrInternal
+	}
+
+	return runs, total, nil
 }

@@ -3,11 +3,12 @@ package domain
 import "errors"
 
 var (
-	ErrInvalidRequest    = errors.New("invalid request")
-	ErrNotFound          = errors.New("entity not found")
-	ErrUserExists        = errors.New("user already exists")
-	ErrAssistantInactive = errors.New("assistant is inactive")
-	ErrLLMProvider       = errors.New("LLM provider error")
-	ErrInvalidRole       = errors.New("invalid role")
-	ErrCategoryNotFound  = errors.New("category not found")
+	ErrInvalidRequest     = errors.New("INVALID_REQUEST")
+	ErrInvalidCredentials = errors.New("INVALID_CREDENTIALS")
+	ErrNotFound           = errors.New("NOT_FOUND")
+	ErrUserExists         = errors.New("USER_ALREADY_EXISTS")
+	ErrAssistantInactive  = errors.New("ASSISTANT_INACTIVE")
+	ErrLLMProvider        = errors.New("LLM PROVIDER_ERROR")
+	ErrInvalidRole        = errors.New("INVALID_ROLE")
+	ErrInternal           = errors.New("INTERNAL_ERROR")
 )

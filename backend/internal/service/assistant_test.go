@@ -62,36 +62,35 @@ func TestAssistantService_GetAll(t *testing.T) {
 	mockAssistantRepo.AssertExpectations(t)
 }
 func TestAssistantService_GetAll_FilterByCategory(t *testing.T) {
-        mockAssistantRepo := new(MockAssistantRepo)
-        mockCategoryRepo := new(MockCategoryRepo)
+	mockAssistantRepo := new(MockAssistantRepo)
+	mockCategoryRepo := new(MockCategoryRepo)
 
-        assistantService := service.NewAssistantService(
-                mockAssistantRepo,
-                mockCategoryRepo,
-        )
+	assistantService := service.NewAssistantService(
+		mockAssistantRepo,
+		mockCategoryRepo,
+	)
 
-        ctx := context.Background()
-        categoryID := uuid.New()
-        filter := domain.AssistantFilter{
-                CategoryID: &categoryID,
-        }
+	ctx := context.Background()
+	categoryID := uuid.New()
+	filter := domain.AssistantFilter{
+		CategoryID: &categoryID,
+	}
 
-        expected := []*domain.Assistant{
-                {ID: uuid.New(), CategoryID: categoryID},
-        }
+	expected := []*domain.Assistant{
+		{ID: uuid.New(), CategoryID: categoryID},
+	}
 
-        mockAssistantRepo.On("List", ctx, filter).Return(expected, 1, nil)
+	mockAssistantRepo.On("List", ctx, filter).Return(expected, 1, nil)
 
-        result, total, err := assistantService.GetAll(ctx, filter)
+	result, total, err := assistantService.GetAll(ctx, filter)
 
-        assert.NoError(t, err)
-        assert.Equal(t, 1, total)
-        assert.Len(t, result, 1)
-        assert.Equal(t, categoryID, result[0].CategoryID)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, total)
+	assert.Len(t, result, 1)
+	assert.Equal(t, categoryID, result[0].CategoryID)
 
-        mockAssistantRepo.AssertExpectations(t)
+	mockAssistantRepo.AssertExpectations(t)
 }
-
 
 func TestAssistantService_Create(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
@@ -165,7 +164,7 @@ func TestAssistantService_Create_NonexistentCategory(t *testing.T) {
 
 	result, err := service.Create(ctx, assistantData)
 
-	assert.ErrorIs(t, err, domain.ErrCategoryNotFound)
+	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
 
 	mockCategoryRepo.AssertExpectations(t)
@@ -248,7 +247,7 @@ func TestAssistantService_Update_NonexistentCategory(t *testing.T) {
 
 	result, err := assistantService.Update(ctx, assistantData)
 
-	assert.ErrorIs(t, err, domain.ErrCategoryNotFound)
+	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
 
 	mockCategoryRepo.AssertExpectations(t)

@@ -19,14 +19,20 @@ func NewCategoryService(categoryRepo categoryRepo) *CategoryService {
 }
 
 func (s *CategoryService) GetAll(ctx context.Context) ([]*domain.Category, error) {
-	return s.categoryRepo.GetAll(ctx)
+	categories, err := s.categoryRepo.GetAll(ctx)
+
+	if err != nil {
+		return nil, domain.ErrInternal
+	}
+
+	return categories, nil
 }
 
 func (s *CategoryService) Create(ctx context.Context, category *domain.Category) (*domain.Category, error) {
 	err := s.categoryRepo.Create(ctx, category)
 
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	return category, nil

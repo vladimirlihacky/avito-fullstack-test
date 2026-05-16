@@ -39,11 +39,11 @@ func (s *AssistantService) Create(ctx context.Context, assistant *domain.Assista
 		return nil, domain.ErrInvalidRequest
 	}
 	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
-		return nil, domain.ErrCategoryNotFound
+		return nil, domain.ErrInvalidRequest
 	}
 
 	if err := s.assistantRepo.Create(ctx, assistant); err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	return assistant, nil
@@ -58,10 +58,10 @@ func (s *AssistantService) Update(ctx context.Context, assistant *domain.Assista
 		return nil, domain.ErrInvalidRequest
 	}
 	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
-		return nil, domain.ErrCategoryNotFound
+		return nil, domain.ErrInvalidRequest
 	}
 	if err := s.assistantRepo.Update(ctx, assistant); err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	return assistant, nil

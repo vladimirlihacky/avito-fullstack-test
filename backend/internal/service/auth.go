@@ -35,7 +35,7 @@ func (s *AuthService) DummyLogin(role domain.Role) (*domain.Token, error) {
 
 	token, err := auth.GenerateToken(user.ID, user.Role, s.secret)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	return &domain.Token{Token: token, User: &user}, nil
@@ -47,7 +47,7 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (*do
 		return nil, domain.ErrUserExists
 	}
 	if !errors.Is(err, domain.ErrNotFound) {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 	user := &domain.User{
 		Email: email,
@@ -55,15 +55,15 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (*do
 	}
 	passwordHash, err := auth.HashPassword(password)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 	if err = s.userRepo.Create(ctx, user, passwordHash); err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 
 	token, err := auth.GenerateToken(user.ID, user.Role, s.secret)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrInternal
 	}
 	return &domain.Token{Token: token, User: user}, nil
 }
@@ -74,13 +74,17 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 		return nil, err
 	}
 	if !auth.CheckPassword(password, passwordHash) {
-		return nil, domain.ErrInvalidRequest
+		return nil, domain.ErrInvalidCredentials
 	}
 
 	token, err := auth.GenerateToken(user.ID, user.Role, s.secret)
 
+	if err != nil {
+		return nil, domain.ErrInternal
+	}
+
 	return &domain.Token{
 		Token: token,
 		User:  user,
-	}, err
+	}, nil
 }
