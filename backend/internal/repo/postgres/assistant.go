@@ -81,10 +81,19 @@ func (r *AssistantRepo) List(ctx context.Context, f domain.AssistantFilter) ([]*
 		i++
 	}
 	if f.Search != "" {
+
 		where = append(where, fmt.Sprintf(
-			"to_tsvector('russian', a.name || ' ' || a.description) @@ websearch_to_tsquery('russian', $%d)", i,
+			"(coalesce(a.name, '') || ' ' || coalesce(a.description, '')) ILIKE $%d ESCAPE '\\'",
+			i,
 		))
-		args = append(args, f.Search)
+
+		src := f.Search
+		src = strings.ReplaceAll(src, "\\", "\\\\")
+		src = strings.ReplaceAll(src, "%", "\\%")
+		src = strings.ReplaceAll(src, "_", "\\_")
+
+		searchQuery := "%" + src + "%"
+		args = append(args, searchQuery)
 		i++
 	}
 
