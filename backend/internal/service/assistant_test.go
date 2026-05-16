@@ -277,7 +277,7 @@ func TestAssistantService_Update_DatabaseError(t *testing.T) {
 
 	result, err := assistantService.Update(ctx, assistantData)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
 
 	mockAssistantRepo.AssertExpectations(t)
@@ -307,7 +307,7 @@ func TestAssistantService_Create_DatabaseError(t *testing.T) {
 
 	result, err := assistantService.Create(ctx, assistantData)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
 
 	mockAssistantRepo.AssertExpectations(t)

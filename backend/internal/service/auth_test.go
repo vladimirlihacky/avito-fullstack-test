@@ -76,7 +76,7 @@ func TestAuthService_Login_InvalidPassword(t *testing.T) {
 
 	token, err := authService.Login(ctx, email, password)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInvalidCredentials)
 	assert.Nil(t, token)
 
 	mockUserRepo.AssertExpectations(t)
@@ -166,7 +166,7 @@ func TestAuthService_Register_DatabaseError(t *testing.T) {
 
 	token, err := authService.Register(ctx, email, password)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, token)
 
 	mockUserRepo.AssertExpectations(t)

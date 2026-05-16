@@ -57,7 +57,7 @@ func TestCategoryService_GetAll_DatabaseError(t *testing.T) {
 
 	result, err := categoryService.GetAll(ctx)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
 
 	mockCategoryRepo.AssertExpectations(t)
@@ -93,11 +93,11 @@ func TestCategoryService_Create_DatabaseError(t *testing.T) {
 		Description: ptrStr("Tools for AI assistants"),
 	}
 
-	mockCategoryRepo.On("Create", ctx, category).Return(domain.ErrInvalidRequest)
+	mockCategoryRepo.On("Create", ctx, category).Return(domain.ErrInternal)
 
 	result, err := categoryService.Create(ctx, category)
 
-	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
+	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
 
 	mockCategoryRepo.AssertExpectations(t)
