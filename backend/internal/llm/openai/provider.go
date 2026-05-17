@@ -3,7 +3,6 @@ package openai
 import (
 	"backend/internal/domain"
 	"context"
-	"fmt"
 
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
@@ -28,7 +27,9 @@ func NewProvider(baseURL, apiKey string) domain.LLMProvider {
 	}
 }
 
-func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) (domain.LLMResponse, error) {
+func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) domain.LLMResponse {
+	llmResponse := domain.LLMResponse{}
+
 	chatCompletion, err := p.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Model: req.Model,
 		Messages: []openai.ChatCompletionMessageParamUnion{
@@ -37,14 +38,50 @@ func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) (domain.
 		},
 	})
 
-	if err != nil {
-		fmt.Printf("LLM PROVIDER ERROR %v", err)
-		return domain.LLMResponse{}, err
+	llmResponse.Error = err
+	llmResponse.Output = chatCompletion.Choices[0].Message.Content
+
+	return llmResponse
+}
+
+func (p *Provider) CompleteStream(ctx context.Context, req domain.LLMRequest) domain.LLMResponseStream {
+	outChan := make(chan string)
+	errChan := make(chan error)
+
+	llmResponseStream := domain.LLMResponseStream{
+		OutputChan: outChan,
+		ErrorChan:  errChan,
 	}
 
-	llmResponse := domain.LLMResponse{
-		Output: chatCompletion.Choices[0].Message.Content,
-	}
+	go func() {
+		defer close(outChan)
+		defer close(errChan)
 
-	return llmResponse, nil
+		stream := p.client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
+			Model: req.Model,
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage(req.SystemPrompt),
+				openai.UserMessage(req.UserPrompt),
+			},
+		})
+
+		for stream.Next() {
+			select {
+			case <-ctx.Done():
+				errChan <- ctx.Err()
+				return
+			default:
+			}
+
+			event := stream.Current()
+			outChan <- event.Choices[0].Delta.Content
+		}
+
+		for stream.Err() != nil {
+			errChan <- stream.Err()
+			return
+		}
+	}()
+
+	return llmResponseStream
 }

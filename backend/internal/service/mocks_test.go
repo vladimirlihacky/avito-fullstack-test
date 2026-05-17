@@ -117,9 +117,38 @@ type MockLLMProvider struct {
 	mock.Mock
 }
 
-func (m *MockLLMProvider) Complete(ctx context.Context, req domain.LLMRequest) (domain.LLMResponse, error) {
+func (m *MockLLMProvider) Complete(ctx context.Context, req domain.LLMRequest) domain.LLMResponse {
 	args := m.Called(ctx, req)
-	return args.Get(0).(domain.LLMResponse), args.Error(1)
+
+	if resp, ok := args.Get(0).(domain.LLMResponse); ok {
+		return resp
+	}
+
+	var output string
+	if args.Get(0) != nil {
+		output = args.Get(0).(string)
+	}
+
+	return domain.LLMResponse{
+		Output: output,
+		Error:  args.Error(1),
+	}
+}
+
+func (m *MockLLMProvider) CompleteStream(ctx context.Context, req domain.LLMRequest) domain.LLMResponseStream {
+	args := m.Called(ctx, req)
+
+	if resp, ok := args.Get(0).(domain.LLMResponseStream); ok {
+		return resp
+	}
+
+	outChan, _ := args.Get(0).(chan string)
+	errChan := make(chan error, 1)
+	errChan <- args.Error(1)
+	return domain.LLMResponseStream{
+		OutputChan: outChan,
+		ErrorChan:  errChan,
+	}
 }
 
 func ptrStr(s string) *string {

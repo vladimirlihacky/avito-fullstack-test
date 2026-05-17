@@ -36,8 +36,8 @@ func TestRunService_Create_Success(t *testing.T) {
 		return r.UserID == userID && r.AssistantID == assistantID && r.Status == domain.RunStatusPending
 	})).Return(nil)
 
-	llmResponse := domain.LLMResponse{Output: "Why did the programmer quit his job? Because he didn't get arrays!"}
-	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(llmResponse, nil)
+	llmResponse := domain.LLMResponse{Output: "Why did the programmer quit his job? Because he didn't get arrays!", Error: nil}
+	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(llmResponse)
 
 	mockRunRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
 
@@ -130,7 +130,7 @@ func TestRunService_Create_LLMProviderError(t *testing.T) {
 		return r.Status == domain.RunStatusPending
 	})).Return(nil)
 
-	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(domain.LLMResponse{}, domain.ErrLLMProvider)
+	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(domain.LLMResponse{Error: domain.ErrLLMProvider})
 
 	mockRunRepo.On("Update", ctx, mock.MatchedBy(func(r *domain.Run) bool {
 		return r.Status == domain.RunStatusFailed && r.Error != nil
