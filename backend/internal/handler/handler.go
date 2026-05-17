@@ -14,6 +14,7 @@ import (
 
 type runService interface {
 	Create(ctx context.Context, assistantID uuid.UUID, userID uuid.UUID, userPrompt string) (*domain.Run, error)
+	CreateStream(ctx context.Context, assistantID uuid.UUID, userID uuid.UUID, userPrompt string) (*domain.Run, *domain.LLMResponseStream, error)
 	List(ctx context.Context, f domain.RunFilter) ([]*domain.Run, int, error)
 }
 
@@ -102,6 +103,7 @@ func (h *Handler) SetupRoutes() {
 		r.Get("/assistants/{assistantId}", h.GetAssistant)
 		r.With(RequireAdmin()).Put("/assistants/{assistantId}", h.UpdateAssistant)
 		r.Post("/assistants/{assistantId}/run", h.RunAssistant)
+		r.Post("/assistants/{assistantId}/stream", h.RunAssistantStream)
 
 		// Runs
 		r.Get("/runs/my", h.GetMyRuns)

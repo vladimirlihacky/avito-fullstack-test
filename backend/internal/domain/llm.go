@@ -10,8 +10,15 @@ type LLMRequest struct {
 
 type LLMResponse struct {
 	Output string
+	Error  error
+}
+
+type LLMResponseStream struct {
+	OutputChan <-chan string
+	ErrorChan  <-chan error
 }
 
 type LLMProvider interface {
-	Complete(ctx context.Context, req LLMRequest) (LLMResponse, error)
+	Complete(ctx context.Context, req LLMRequest) LLMResponse
+	CompleteStream(ctx context.Context, req LLMRequest) LLMResponseStream
 }

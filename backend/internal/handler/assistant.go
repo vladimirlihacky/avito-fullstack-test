@@ -3,7 +3,9 @@ package handler
 import (
 	"backend/internal/domain"
 	"backend/internal/handler/dto"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -299,4 +301,90 @@ func (h *Handler) RunAssistant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusCreated, response)
+}
+
+func (h *Handler) RunAssistantStream(w http.ResponseWriter, r *http.Request) {
+	assistantIdStr := chi.URLParam(r, "assistantId")
+
+	req := dto.CreateRunRequest{
+		AssistantID: assistantIdStr,
+	}
+	if err := readJSONBody(r, &req); err != nil {
+		respondError(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		return
+	}
+	if err := h.validate.Struct(req); err != nil {
+		respondValidationError(w, err)
+		return
+	}
+
+	assistantId := uuid.MustParse(assistantIdStr)
+	claims, _ := ClaimsFromContext(r.Context())
+	userId := claims.UserID
+
+	run, resp, err := h.runService.CreateStream(r.Context(), assistantId, userId, req.UserPrompt)
+	if err != nil {
+		if errors.Is(err, domain.ErrAssistantInactive) {
+			respondError(w, http.StatusConflict, "ASSISTANT_INACTIVE", "Assistant is inactive")
+			return
+		}
+		respondError(w, http.StatusInternalServerError, "STREAM_INIT_ERROR", err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		respondError(w, http.StatusInternalServerError, "STREAM_NOT_SUPPORTED", "Streaming not supported")
+		return
+	}
+
+	startEvent := map[string]interface{}{
+		"run_id":     run.ID.String(),
+		"status":     run.Status,
+		"created_at": run.CreatedAt,
+	}
+	startJSON, _ := json.Marshal(startEvent)
+	_, err = fmt.Fprintf(w, "event: run_start\ndata: %s\n\n", startJSON)
+	if err != nil {
+		return
+	}
+	flusher.Flush()
+
+	for {
+		select {
+		case chunk, ok := <-resp.OutputChan:
+			if !ok {
+				_, err := fmt.Fprintf(w, "event: end\ndata: {}\n\n")
+				if err != nil {
+					return
+				}
+				flusher.Flush()
+				return
+			}
+			_, err = fmt.Fprintf(w, "event: chunk\ndata: %s\n\n", chunk)
+			if err != nil {
+				return
+			}
+			flusher.Flush()
+
+		case err, ok := <-resp.ErrorChan:
+			if ok && err != nil {
+				errEvent, _ := json.Marshal(map[string]string{"error": err.Error()})
+				_, err = fmt.Fprintf(w, "event: error\ndata: %s\n\n", errEvent)
+				if err != nil {
+					return
+				}
+				flusher.Flush()
+				return
+			}
+
+		case <-r.Context().Done():
+			return
+		}
+	}
 }
