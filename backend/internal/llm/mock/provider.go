@@ -48,11 +48,11 @@ func (p *Provider) CompleteStream(ctx context.Context, req domain.LLMRequest) do
 
 		output := fmt.Sprintf("[mock] model=%s | %s", req.Model, req.UserPrompt)
 
-		words := strings.Fields(output)
+		words := strings.Split(output, " ")
 
 		for i, word := range words {
 			select {
-			case outChan <- word:
+			case outChan <- word + " ":
 			case <-ctx.Done():
 				errChan <- ctx.Err()
 				return
@@ -60,7 +60,7 @@ func (p *Provider) CompleteStream(ctx context.Context, req domain.LLMRequest) do
 
 			if i < len(words)-1 {
 				select {
-				case <-time.After(p.latency):
+				case <-time.After(p.latency / 10):
 				case <-ctx.Done():
 					errChan <- ctx.Err()
 					return
