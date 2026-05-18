@@ -1,53 +1,88 @@
-import { cn } from "@/shared/utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Input } from "@/components/ui/input";
-import { Field, FieldGroup, FieldLabel, FieldSeparator } from "../ui/field";
-import { Button } from "../ui/button";
-import { Link } from "react-router";
+import { useUnit } from 'effector-react'
+import { type FormEvent, useState } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router'
+import { $currentToken, authModel } from '@/shared/api/model'
+import { cn } from '@/shared/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 
 export default function LoginForm() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = authModel
+  const pending = useUnit(login.$pending)
+  const error = useUnit(login.$error)
+  const token = useUnit($currentToken)
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  if (token) {
+    const to = (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
+    navigate(to, { replace: true })
+    return null
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    login.fx({ email, password })
+  }
+
   return (
-    <div className={cn("flex flex-col gap-6")}>
+    <div className={cn('flex flex-col gap-6')}>
       <Card>
         <CardHeader>
           <CardTitle>Log in</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input 
+                <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input 
+                <Input
                   id="password"
                   type="password"
                   placeholder="*****_"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </Field>
+              {error && (
+                <p className="text-sm text-destructive">{error.message}</p>
+              )}
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={pending}>
+                  {pending ? 'Logging in...' : 'Login'}
+                </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Don't have an account?
               </FieldSeparator>
               <Field className="flex-row">
                 <Link to="/register" className="w-full">
-                  <Button type="button" variant="outline" className="w-full">Register</Button>
+                  <Button type="button" variant="outline" className="w-full">
+                    Register
+                  </Button>
                 </Link>
                 <Link to="/dummyLogin" className="w-full">
-                  <Button type="button" variant="outline" className="w-full">Dummy login</Button>
+                  <Button type="button" variant="outline" className="w-full">
+                    Dummy login
+                  </Button>
                 </Link>
               </Field>
             </FieldGroup>

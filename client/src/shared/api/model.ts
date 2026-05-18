@@ -1,6 +1,6 @@
-import { createEffect, createStore, sample } from 'effector'
+import { createEffect, createEvent, createStore, sample } from 'effector'
 import { authApi, assistantsApi, categoriesApi, runsApi, systemApi } from './client'
-import { tokenStorage } from './fetcher'
+import { authStorage, tokenStorage } from './fetcher'
 import type {
   AdminRunsListParams,
   Assistant,
@@ -48,13 +48,17 @@ function createMutation<Params, Data>(
   return { fx, $pending, $error }
 }
 
-
 export const systemModel = {
   healthcheck: createQuery(() => systemApi.healthcheck()),
 }
 
+// --- Auth ---
+
 function createAuthMutation<TInput>(apiFn: (input: TInput) => Promise<Token>) {
-  return createMutation(apiFn, (token) => tokenStorage.set(token.token))
+  return createMutation(apiFn, (token) => {
+    tokenStorage.set(token.token)
+    authStorage.set(token)
+  })
 }
 
 export const authModel = {
@@ -63,10 +67,36 @@ export const authModel = {
   register: createAuthMutation<RegisterInput>(authApi.register),
 }
 
+const initAuthFx = createEffect(() => authStorage.get())
+
 export const $currentToken = createStore<Token | null>(null)
   .on(authModel.dummyLogin.fx.doneData, (_, token) => token)
   .on(authModel.login.fx.doneData, (_, token) => token)
   .on(authModel.register.fx.doneData, (_, token) => token)
+  .on(initAuthFx.doneData, (_, data) => data)
+
+export const $isAuthenticated = $currentToken.map(Boolean)
+export const $isAdmin = $currentToken.map((t) => t?.user.role === 'admin')
+export const $authUser = $currentToken.map((t) => t?.user ?? null)
+
+export const $authReady = createStore(false)
+  .on(initAuthFx.finally, () => true)
+
+export const logoutEvent = createEvent()
+
+sample({
+  clock: logoutEvent,
+  fn: () => {
+    tokenStorage.clear()
+    authStorage.clear()
+    return null
+  },
+  target: $currentToken,
+})
+
+export function initAuth() {
+  initAuthFx()
+}
 
 
 const listCategoriesFx = createEffect(categoriesApi.list)

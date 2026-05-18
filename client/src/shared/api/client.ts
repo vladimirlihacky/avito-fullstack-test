@@ -1,4 +1,4 @@
-import { apiFetch, buildQuery } from './fetcher'
+import { apiFetch, BASE_URL, buildQuery, tokenStorage } from './fetcher'
 import type {
   AdminRunsListParams,
   Assistant,
@@ -56,6 +56,27 @@ export const assistantsApi = {
 
   run: (assistantId: string, input: AssistantRunCreateInput): Promise<AssistantRun> =>
     apiFetch(`/assistants/${assistantId}/run`, { method: 'POST', body: input }),
+
+  stream: async (assistantId: string, input: AssistantRunCreateInput): Promise<ReadableStreamDefaultReader<Uint8Array>> => {
+    const token = tokenStorage.get()
+    const response = await fetch(`${BASE_URL}/assistants/${assistantId}/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(input),
+    })
+    if (!response.ok) {
+      let message = 'Stream failed'
+      try {
+        const err = await response.json() as { error?: { message?: string } }
+        message = err.error?.message ?? message
+      } catch { /* ignore */ }
+      throw new Error(message)
+    }
+    return response.body!.getReader()
+  },
 }
 
 export const runsApi = {

@@ -20,7 +20,7 @@ type CreateAssistantRequest struct {
 }
 
 type GetAssistantRequest struct {
-	AssistantID string `validate:"required,uuid4"`
+	AssistantID string `validate:"required,uuid"`
 }
 
 type UpdateAssistantRequest struct {

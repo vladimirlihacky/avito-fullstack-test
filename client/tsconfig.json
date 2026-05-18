@@ -3,7 +3,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["bun"]
   },
   "references": [
     { "path": "./tsconfig.app.json" },
