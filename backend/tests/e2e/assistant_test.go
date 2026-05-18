@@ -29,6 +29,7 @@ func TestE2E_FullFlow(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Ты тестовый ассистент",
 		IsActive:     true,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 	require.NotEqual(t, uuid.Nil, assistant.ID)
@@ -62,6 +63,7 @@ func TestE2E_FilterAssistantsByCategory(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Промпт",
 		IsActive:     true,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 
@@ -72,6 +74,7 @@ func TestE2E_FilterAssistantsByCategory(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Промпт",
 		IsActive:     true,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 
@@ -82,6 +85,7 @@ func TestE2E_FilterAssistantsByCategory(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Промпт",
 		IsActive:     true,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 
@@ -123,6 +127,7 @@ func TestE2E_RunInactiveAssistant(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Промпт",
 		IsActive:     false,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 

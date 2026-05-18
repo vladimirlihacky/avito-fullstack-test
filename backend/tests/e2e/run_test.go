@@ -24,6 +24,7 @@ func TestE2E_LLMProviderError_RunSavedAsFailed(t *testing.T) {
 		Model:        "mock",
 		SystemPrompt: "Промпт",
 		IsActive:     true,
+		ProviderName: "mock",
 	})
 	require.NoError(t, err)
 

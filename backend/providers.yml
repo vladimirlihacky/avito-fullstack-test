@@ -1,0 +1,13 @@
+providers:
+  - name: mock
+    type: mock
+    models:
+      - mock-model
+
+  - name: deepseek
+    type: openai
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    models:
+      - deepseek-chat
+      - deepseek-reasoner

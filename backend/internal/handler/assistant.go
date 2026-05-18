@@ -83,6 +83,7 @@ func (h *Handler) GetAssistants(w http.ResponseWriter, r *http.Request) {
 			Model:             assistant.Model,
 			ExampleUserPrompt: assistant.ExampleUserPrompt,
 			IsActive:          assistant.IsActive,
+			ProviderName:      assistant.ProviderName,
 			CreatedAt:         assistant.CreatedAt,
 			UpdatedAt:         assistant.UpdatedAt,
 		}
@@ -118,12 +119,17 @@ func (h *Handler) CreateAssistant(w http.ResponseWriter, r *http.Request) {
 		SystemPrompt:      req.SystemPrompt,
 		ExampleUserPrompt: req.ExampleUserPrompt,
 		IsActive:          req.IsActive,
+		ProviderName:      req.ProviderName,
 	}
 
 	createdAssistant, err := h.assistantService.Create(r.Context(), assistant)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidRequest) {
 			respondError(w, http.StatusBadRequest, "CATEGORY_NOT_FOUND", "Category not found")
+			return
+		}
+		if errors.Is(err, domain.ErrProviderNotFound) {
+			respondError(w, http.StatusBadRequest, "PROVIDER_NOT_FOUND", "Provider not found")
 			return
 		}
 		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")
@@ -139,6 +145,7 @@ func (h *Handler) CreateAssistant(w http.ResponseWriter, r *http.Request) {
 		Model:             createdAssistant.Model,
 		ExampleUserPrompt: createdAssistant.ExampleUserPrompt,
 		IsActive:          createdAssistant.IsActive,
+		ProviderName:      createdAssistant.ProviderName,
 		CreatedAt:         createdAssistant.CreatedAt,
 		UpdatedAt:         createdAssistant.UpdatedAt,
 		SystemPrompt:      &createdAssistant.SystemPrompt,
@@ -178,6 +185,7 @@ func (h *Handler) GetAssistant(w http.ResponseWriter, r *http.Request) {
 		Model:             assistant.Model,
 		ExampleUserPrompt: assistant.ExampleUserPrompt,
 		IsActive:          assistant.IsActive,
+		ProviderName:      assistant.ProviderName,
 		CreatedAt:         assistant.CreatedAt,
 		UpdatedAt:         assistant.UpdatedAt,
 	}
@@ -221,11 +229,16 @@ func (h *Handler) UpdateAssistant(w http.ResponseWriter, r *http.Request) {
 	assistant.SystemPrompt = req.SystemPrompt
 	assistant.ExampleUserPrompt = req.ExampleUserPrompt
 	assistant.IsActive = *req.IsActive
+	assistant.ProviderName = req.ProviderName
 
 	updatedAssistant, err := h.assistantService.Update(r.Context(), assistant)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidRequest) {
 			respondError(w, http.StatusBadRequest, "CATEGORY_NOT_FOUND", "Category not found")
+			return
+		}
+		if errors.Is(err, domain.ErrProviderNotFound) {
+			respondError(w, http.StatusBadRequest, "PROVIDER_NOT_FOUND", "Provider not found")
 			return
 		}
 		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")
@@ -241,6 +254,7 @@ func (h *Handler) UpdateAssistant(w http.ResponseWriter, r *http.Request) {
 		Model:             updatedAssistant.Model,
 		ExampleUserPrompt: updatedAssistant.ExampleUserPrompt,
 		IsActive:          updatedAssistant.IsActive,
+		ProviderName:      updatedAssistant.ProviderName,
 		CreatedAt:         updatedAssistant.CreatedAt,
 		UpdatedAt:         updatedAssistant.UpdatedAt,
 		SystemPrompt:      &updatedAssistant.SystemPrompt,
@@ -279,6 +293,10 @@ func (h *Handler) RunAssistant(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(err, domain.ErrLLMProvider) {
 			respondError(w, http.StatusBadGateway, "LLM_PROVIDER_ERROR", "LLM provider error")
+			return
+		}
+		if errors.Is(err, domain.ErrProviderNotFound) {
+			respondError(w, http.StatusBadGateway, "PROVIDER_NOT_FOUND", "Provider not found or unavailable")
 			return
 		}
 		respondError(w, http.StatusBadGateway, "INTERNAL_ERROR", "Internal server error")

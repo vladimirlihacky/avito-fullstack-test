@@ -13,10 +13,12 @@ import (
 func TestAssistantService_GetByID(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	service := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -25,7 +27,7 @@ func TestAssistantService_GetByID(t *testing.T) {
 
 	mockAssistantRepo.On("GetByID", ctx, targetID).Return(expectedAssistant, nil)
 
-	result, err := service.GetByID(ctx, targetID)
+	result, err := svc.GetByID(ctx, targetID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedAssistant, result)
@@ -36,10 +38,12 @@ func TestAssistantService_GetByID(t *testing.T) {
 func TestAssistantService_GetAll(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	service := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -53,7 +57,7 @@ func TestAssistantService_GetAll(t *testing.T) {
 
 	mockAssistantRepo.On("List", ctx, assistantFilter).Return(expectedAssistants, len(expectedAssistants), nil)
 
-	result, total, err := service.GetAll(ctx, assistantFilter)
+	result, total, err := svc.GetAll(ctx, assistantFilter)
 
 	assert.NoError(t, err)
 	assert.Equal(t, len(expectedAssistants), total)
@@ -61,13 +65,16 @@ func TestAssistantService_GetAll(t *testing.T) {
 
 	mockAssistantRepo.AssertExpectations(t)
 }
+
 func TestAssistantService_GetAll_FilterByCategory(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -82,7 +89,7 @@ func TestAssistantService_GetAll_FilterByCategory(t *testing.T) {
 
 	mockAssistantRepo.On("List", ctx, filter).Return(expected, 1, nil)
 
-	result, total, err := assistantService.GetAll(ctx, filter)
+	result, total, err := svc.GetAll(ctx, filter)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, total)
@@ -95,10 +102,12 @@ func TestAssistantService_GetAll_FilterByCategory(t *testing.T) {
 func TestAssistantService_Create(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	service := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -108,12 +117,14 @@ func TestAssistantService_Create(t *testing.T) {
 		Name:         "A",
 		CategoryID:   categoryId,
 		SystemPrompt: "System prompt",
+		ProviderName: "test-mock",
 	}
 
+	mockRegistry.On("Exists", "test-mock").Return(true)
 	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(nil, nil)
 	mockAssistantRepo.On("Create", ctx, assistantData).Return(nil)
 
-	result, err := service.Create(ctx, assistantData)
+	result, err := svc.Create(ctx, assistantData)
 
 	assert.NoError(t, err)
 	assert.Equal(t, assistantData, result)
@@ -124,10 +135,12 @@ func TestAssistantService_Create(t *testing.T) {
 func TestAssistantService_Create_WithoutSystemPrompt(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	service := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -136,7 +149,7 @@ func TestAssistantService_Create_WithoutSystemPrompt(t *testing.T) {
 		Name: "A",
 	}
 
-	result, err := service.Create(ctx, assistantData)
+	result, err := svc.Create(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
@@ -145,10 +158,12 @@ func TestAssistantService_Create_WithoutSystemPrompt(t *testing.T) {
 func TestAssistantService_Create_NonexistentCategory(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	service := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -160,9 +175,10 @@ func TestAssistantService_Create_NonexistentCategory(t *testing.T) {
 		Name:         "A",
 		SystemPrompt: "System prompt",
 		CategoryID:   id,
+		ProviderName: "test-mock",
 	}
 
-	result, err := service.Create(ctx, assistantData)
+	result, err := svc.Create(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
@@ -170,13 +186,47 @@ func TestAssistantService_Create_NonexistentCategory(t *testing.T) {
 	mockCategoryRepo.AssertExpectations(t)
 }
 
+func TestAssistantService_Create_ProviderNotFound(t *testing.T) {
+	mockAssistantRepo := new(MockAssistantRepo)
+	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
+
+	svc := service.NewAssistantService(
+		mockAssistantRepo,
+		mockCategoryRepo,
+		mockRegistry,
+	)
+
+	ctx := context.Background()
+
+	categoryId := uuid.New()
+	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(nil, nil)
+	mockRegistry.On("Exists", "unknown-provider").Return(false)
+
+	assistantData := &domain.Assistant{
+		Name:         "A",
+		SystemPrompt: "System prompt",
+		CategoryID:   categoryId,
+		ProviderName: "unknown-provider",
+	}
+
+	result, err := svc.Create(ctx, assistantData)
+
+	assert.ErrorIs(t, err, domain.ErrProviderNotFound)
+	assert.Nil(t, result)
+
+	mockRegistry.AssertExpectations(t)
+}
+
 func TestAssistantService_Update_Success(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -187,12 +237,14 @@ func TestAssistantService_Update_Success(t *testing.T) {
 		Name:         "Updated AI",
 		CategoryID:   categoryId,
 		SystemPrompt: "Updated system prompt",
+		ProviderName: "test-mock",
 	}
 
+	mockRegistry.On("Exists", "test-mock").Return(true)
 	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(&domain.Category{ID: categoryId}, nil)
 	mockAssistantRepo.On("Update", ctx, assistantData).Return(nil)
 
-	result, err := assistantService.Update(ctx, assistantData)
+	result, err := svc.Update(ctx, assistantData)
 
 	assert.NoError(t, err)
 	assert.Equal(t, assistantData, result)
@@ -204,10 +256,12 @@ func TestAssistantService_Update_Success(t *testing.T) {
 func TestAssistantService_Update_WithoutSystemPrompt(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -218,7 +272,7 @@ func TestAssistantService_Update_WithoutSystemPrompt(t *testing.T) {
 		SystemPrompt: "",
 	}
 
-	result, err := assistantService.Update(ctx, assistantData)
+	result, err := svc.Update(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
@@ -227,10 +281,12 @@ func TestAssistantService_Update_WithoutSystemPrompt(t *testing.T) {
 func TestAssistantService_Update_NonexistentCategory(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -241,11 +297,12 @@ func TestAssistantService_Update_NonexistentCategory(t *testing.T) {
 		Name:         "Updated AI",
 		CategoryID:   categoryId,
 		SystemPrompt: "System prompt",
+		ProviderName: "test-mock",
 	}
 
 	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(nil, domain.ErrNotFound)
 
-	result, err := assistantService.Update(ctx, assistantData)
+	result, err := svc.Update(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInvalidRequest)
 	assert.Nil(t, result)
@@ -253,13 +310,48 @@ func TestAssistantService_Update_NonexistentCategory(t *testing.T) {
 	mockCategoryRepo.AssertExpectations(t)
 }
 
+func TestAssistantService_Update_ProviderNotFound(t *testing.T) {
+	mockAssistantRepo := new(MockAssistantRepo)
+	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
+
+	svc := service.NewAssistantService(
+		mockAssistantRepo,
+		mockCategoryRepo,
+		mockRegistry,
+	)
+
+	ctx := context.Background()
+
+	categoryId := uuid.New()
+	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(&domain.Category{ID: categoryId}, nil)
+	mockRegistry.On("Exists", "unknown").Return(false)
+
+	assistantData := &domain.Assistant{
+		ID:           uuid.New(),
+		Name:         "Updated AI",
+		CategoryID:   categoryId,
+		SystemPrompt: "System prompt",
+		ProviderName: "unknown",
+	}
+
+	result, err := svc.Update(ctx, assistantData)
+
+	assert.ErrorIs(t, err, domain.ErrProviderNotFound)
+	assert.Nil(t, result)
+
+	mockRegistry.AssertExpectations(t)
+}
+
 func TestAssistantService_Update_DatabaseError(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -270,12 +362,14 @@ func TestAssistantService_Update_DatabaseError(t *testing.T) {
 		Name:         "Updated AI",
 		CategoryID:   categoryId,
 		SystemPrompt: "System prompt",
+		ProviderName: "test-mock",
 	}
 
+	mockRegistry.On("Exists", "test-mock").Return(true)
 	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(&domain.Category{ID: categoryId}, nil)
 	mockAssistantRepo.On("Update", ctx, assistantData).Return(domain.ErrInvalidRequest)
 
-	result, err := assistantService.Update(ctx, assistantData)
+	result, err := svc.Update(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
@@ -287,10 +381,12 @@ func TestAssistantService_Update_DatabaseError(t *testing.T) {
 func TestAssistantService_Create_DatabaseError(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -300,12 +396,14 @@ func TestAssistantService_Create_DatabaseError(t *testing.T) {
 		Name:         "A",
 		SystemPrompt: "System prompt",
 		CategoryID:   categoryId,
+		ProviderName: "test-mock",
 	}
 
+	mockRegistry.On("Exists", "test-mock").Return(true)
 	mockCategoryRepo.On("GetByID", ctx, categoryId).Return(&domain.Category{ID: categoryId}, nil)
 	mockAssistantRepo.On("Create", ctx, assistantData).Return(domain.ErrInvalidRequest)
 
-	result, err := assistantService.Create(ctx, assistantData)
+	result, err := svc.Create(ctx, assistantData)
 
 	assert.ErrorIs(t, err, domain.ErrInternal)
 	assert.Nil(t, result)
@@ -317,10 +415,12 @@ func TestAssistantService_Create_DatabaseError(t *testing.T) {
 func TestAssistantService_GetByID_NotFound(t *testing.T) {
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockCategoryRepo := new(MockCategoryRepo)
+	mockRegistry := new(MockProviderRegistry)
 
-	assistantService := service.NewAssistantService(
+	svc := service.NewAssistantService(
 		mockAssistantRepo,
 		mockCategoryRepo,
+		mockRegistry,
 	)
 
 	ctx := context.Background()
@@ -328,7 +428,7 @@ func TestAssistantService_GetByID_NotFound(t *testing.T) {
 
 	mockAssistantRepo.On("GetByID", ctx, targetID).Return(nil, domain.ErrNotFound)
 
-	result, err := assistantService.GetByID(ctx, targetID)
+	result, err := svc.GetByID(ctx, targetID)
 
 	assert.ErrorIs(t, err, domain.ErrNotFound)
 	assert.Nil(t, result)

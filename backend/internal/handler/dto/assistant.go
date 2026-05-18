@@ -17,6 +17,7 @@ type CreateAssistantRequest struct {
 	SystemPrompt      string  `json:"systemPrompt" validate:"required"`
 	ExampleUserPrompt *string `json:"exampleUserPrompt"`
 	IsActive          bool    `json:"isActive"`
+	ProviderName      string  `json:"providerName" validate:"required"`
 }
 
 type GetAssistantRequest struct {
@@ -32,6 +33,7 @@ type UpdateAssistantRequest struct {
 	SystemPrompt      string  `json:"systemPrompt" validate:"required"`
 	ExampleUserPrompt *string `json:"exampleUserPrompt"`
 	IsActive          *bool   `json:"isActive" validate:"required"`
+	ProviderName      string  `json:"providerName" validate:"required"`
 }
 
 type GetAssistantResponse struct {
@@ -43,6 +45,7 @@ type GetAssistantResponse struct {
 	Model             string    `json:"model"`
 	ExampleUserPrompt *string   `json:"exampleUserPrompt,omitempty"`
 	IsActive          bool      `json:"isActive"`
+	ProviderName      string    `json:"providerName"`
 	CreatedAt         time.Time `json:"createdAt"`
 	UpdatedAt         time.Time `json:"updatedAt"`
 	SystemPrompt      *string   `json:"systemPrompt,omitempty"`

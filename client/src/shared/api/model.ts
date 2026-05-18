@@ -3,6 +3,7 @@ import {
   authApi,
   assistantsApi,
   categoriesApi,
+  providersApi,
   runsApi,
   systemApi,
 } from './client'
@@ -18,6 +19,7 @@ import type {
   CategoriesResponse,
   DummyLoginInput,
   LoginInput,
+  Provider,
   RegisterInput,
   RunsListParams,
   RunsResponse,
@@ -270,3 +272,22 @@ sample({
   fn: () => ({}),
   target: [myRunsFx, adminRunsFx],
 })
+
+// --- Providers ---
+
+const listProvidersFx = createEffect(() => providersApi.list())
+
+export const $providers = createStore<Provider[]>([]).on(
+  listProvidersFx.doneData,
+  (_, data) => data.providers,
+)
+
+export const providersModel = {
+  list: {
+    fx: listProvidersFx,
+    $pending: listProvidersFx.pending,
+    $error: createStore<Error | null>(null)
+      .on(listProvidersFx.failData, (_, err) => err)
+      .reset(listProvidersFx),
+  },
+}

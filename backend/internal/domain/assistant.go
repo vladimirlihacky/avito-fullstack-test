@@ -16,6 +16,7 @@ type Assistant struct {
 	SystemPrompt      string
 	ExampleUserPrompt *string
 	IsActive          bool
+	ProviderName      string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

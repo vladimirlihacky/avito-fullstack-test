@@ -43,6 +43,7 @@ type Handler struct {
 	authService      authService
 	categoryService  categoryService
 	assistantService assistantService
+	providerService  providerLister
 	authSecret       string
 }
 
@@ -51,6 +52,7 @@ func New(
 	authService authService,
 	categoryService categoryService,
 	assistantService assistantService,
+	providerService providerLister,
 	authSecret string,
 ) *Handler {
 	validate := validator.New()
@@ -61,6 +63,7 @@ func New(
 		authService:      authService,
 		categoryService:  categoryService,
 		assistantService: assistantService,
+		providerService:  providerService,
 		authSecret:       authSecret,
 	}
 }
@@ -92,6 +95,9 @@ func (h *Handler) SetupRoutes() {
 	// Protected routes
 	r.Route("/", func(r chi.Router) {
 		r.Use(RequireAuth(h.authSecret))
+
+		// Providers
+		r.Get("/providers", h.ListProviders)
 
 		// Categories
 		r.Get("/categories", h.GetCategories)

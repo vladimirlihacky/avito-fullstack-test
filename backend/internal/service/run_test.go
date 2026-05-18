@@ -15,8 +15,9 @@ func TestRunService_Create_Success(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -29,6 +30,7 @@ func TestRunService_Create_Success(t *testing.T) {
 		Model:        "gpt-4",
 		SystemPrompt: "You are a comedian",
 		IsActive:     true,
+		ProviderName: "test-mock",
 	}
 
 	mockAssistantRepo.On("GetByID", ctx, assistantID).Return(assistant, nil)
@@ -38,6 +40,8 @@ func TestRunService_Create_Success(t *testing.T) {
 
 	llmResponse := domain.LLMResponse{Output: "Why did the programmer quit his job? Because he didn't get arrays!", Error: nil}
 	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(llmResponse)
+
+	mockRegistry.On("Get", "test-mock").Return(mockLLMProvider, nil)
 
 	mockRunRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
 
@@ -51,14 +55,15 @@ func TestRunService_Create_Success(t *testing.T) {
 	mockAssistantRepo.AssertExpectations(t)
 	mockRunRepo.AssertExpectations(t)
 	mockLLMProvider.AssertExpectations(t)
+	mockRegistry.AssertExpectations(t)
 }
 
 func TestRunService_Create_AssistantInactive(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
-	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -86,9 +91,9 @@ func TestRunService_Create_AssistantInactive(t *testing.T) {
 func TestRunService_Create_AssistantNotFound(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
-	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -109,8 +114,9 @@ func TestRunService_Create_LLMProviderError(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
 	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -123,6 +129,7 @@ func TestRunService_Create_LLMProviderError(t *testing.T) {
 		Model:        "gpt-4",
 		SystemPrompt: "You are a comedian",
 		IsActive:     true,
+		ProviderName: "test-mock",
 	}
 
 	mockAssistantRepo.On("GetByID", ctx, assistantID).Return(assistant, nil)
@@ -131,6 +138,7 @@ func TestRunService_Create_LLMProviderError(t *testing.T) {
 	})).Return(nil)
 
 	mockLLMProvider.On("Complete", mock.Anything, mock.Anything).Return(domain.LLMResponse{Error: domain.ErrLLMProvider})
+	mockRegistry.On("Get", "test-mock").Return(mockLLMProvider, nil)
 
 	mockRunRepo.On("Update", ctx, mock.MatchedBy(func(r *domain.Run) bool {
 		return r.Status == domain.RunStatusFailed && r.Error != nil
@@ -145,14 +153,49 @@ func TestRunService_Create_LLMProviderError(t *testing.T) {
 	mockAssistantRepo.AssertExpectations(t)
 	mockRunRepo.AssertExpectations(t)
 	mockLLMProvider.AssertExpectations(t)
+	mockRegistry.AssertExpectations(t)
+}
+
+func TestRunService_Create_ProviderNotFound(t *testing.T) {
+	mockRunRepo := new(MockRunRepo)
+	mockAssistantRepo := new(MockAssistantRepo)
+	mockRegistry := new(MockProviderRegistry)
+
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
+
+	ctx := context.Background()
+	userID := uuid.New()
+	assistantID := uuid.New()
+
+	assistant := &domain.Assistant{
+		ID:           assistantID,
+		Model:        "gpt-4",
+		SystemPrompt: "S",
+		IsActive:     true,
+		ProviderName: "unknown",
+	}
+
+	mockAssistantRepo.On("GetByID", ctx, assistantID).Return(assistant, nil)
+	mockRunRepo.On("Create", ctx, mock.Anything).Return(nil)
+	mockRegistry.On("Get", "unknown").Return(nil, assert.AnError)
+	mockRunRepo.On("Update", ctx, mock.Anything).Return(nil)
+
+	result, err := runService.Create(ctx, assistantID, userID, "prompt")
+
+	assert.Error(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, domain.RunStatusFailed, result.Status)
+
+	mockAssistantRepo.AssertExpectations(t)
+	mockRegistry.AssertExpectations(t)
 }
 
 func TestRunService_List(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
-	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -193,9 +236,9 @@ func TestRunService_List(t *testing.T) {
 func TestRunService_List_Empty(t *testing.T) {
 	mockRunRepo := new(MockRunRepo)
 	mockAssistantRepo := new(MockAssistantRepo)
-	mockLLMProvider := new(MockLLMProvider)
+	mockRegistry := new(MockProviderRegistry)
 
-	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockLLMProvider)
+	runService := service.NewRunService(mockRunRepo, mockAssistantRepo, mockRegistry)
 
 	ctx := context.Background()
 	filter := domain.RunFilter{

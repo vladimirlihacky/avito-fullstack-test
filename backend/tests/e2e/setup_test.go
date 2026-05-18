@@ -7,9 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-	"time"
 
-	"backend/internal/llm/mock"
+	"backend/internal/provider"
 	"backend/internal/repo/postgres"
 	"backend/internal/service"
 
@@ -71,18 +70,24 @@ func buildServices(pool *pgxpool.Pool) *testServices {
 	assistantRepo := postgres.NewAssistantRepo(pool)
 	runRepo := postgres.NewRunRepo(pool)
 
-	llmProvider := mock.NewProvider(300 * time.Millisecond)
+	cfg := &provider.ProvidersConfig{
+		Providers: []provider.ProviderConfig{
+			{Name: "mock", Type: "mock", Models: []string{"mock-model"}},
+		},
+	}
+	registry := provider.NewRegistry(cfg)
 
 	return &testServices{
 		categoryService: service.NewCategoryService(categoryRepo),
 		assistantService: service.NewAssistantService(
 			assistantRepo,
 			categoryRepo,
+			registry,
 		),
 		runService: service.NewRunService(
 			runRepo,
 			assistantRepo,
-			llmProvider,
+			registry,
 		),
 		authService: service.NewAuthService(
 			userRepo,

@@ -16,5 +16,6 @@ RUN adduser -D backend
 USER backend
 WORKDIR /
 COPY --from=build /main /main
+COPY --from=build /app/providers.yml /providers.yml
 EXPOSE 8080
 ENTRYPOINT ["/main"]
