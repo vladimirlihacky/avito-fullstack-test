@@ -19,14 +19,16 @@ type assistantCategoryRepo interface {
 }
 
 type AssistantService struct {
-	assistantRepo assistantRepo
-	categoryRepo  assistantCategoryRepo
+	assistantRepo    assistantRepo
+	categoryRepo     assistantCategoryRepo
+	providerRegistry domain.ProviderRegistry
 }
 
-func NewAssistantService(assistantRepo assistantRepo, categoryRepo assistantCategoryRepo) *AssistantService {
+func NewAssistantService(assistantRepo assistantRepo, categoryRepo assistantCategoryRepo, registry domain.ProviderRegistry) *AssistantService {
 	return &AssistantService{
-		assistantRepo: assistantRepo,
-		categoryRepo:  categoryRepo,
+		assistantRepo:    assistantRepo,
+		categoryRepo:     categoryRepo,
+		providerRegistry: registry,
 	}
 }
 
@@ -40,6 +42,9 @@ func (s *AssistantService) Create(ctx context.Context, assistant *domain.Assista
 	}
 	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
 		return nil, domain.ErrInvalidRequest
+	}
+	if !s.providerRegistry.Exists(assistant.ProviderName) {
+		return nil, domain.ErrProviderNotFound
 	}
 
 	if err := s.assistantRepo.Create(ctx, assistant); err != nil {
@@ -59,6 +64,9 @@ func (s *AssistantService) Update(ctx context.Context, assistant *domain.Assista
 	}
 	if _, err := s.categoryRepo.GetByID(ctx, assistant.CategoryID); err != nil {
 		return nil, domain.ErrInvalidRequest
+	}
+	if !s.providerRegistry.Exists(assistant.ProviderName) {
+		return nil, domain.ErrProviderNotFound
 	}
 	if err := s.assistantRepo.Update(ctx, assistant); err != nil {
 		return nil, domain.ErrInternal

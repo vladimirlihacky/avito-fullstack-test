@@ -21,22 +21,22 @@ func NewAssistantRepo(pool *pgxpool.Pool) *AssistantRepo {
 }
 
 const assistantSelectBase = `
-	SELECT a.id, a.category_id, c.name as category_name, a.name, a.description, 
-	       a.model, a.system_prompt, a.example_user_prompt, 
-	       a.is_active, a.created_at, a.updated_at
-	FROM assistants a
-	JOIN categories c ON a.category_id = c.id
-`
+		SELECT a.id, a.category_id, c.name as category_name, a.name, a.description,
+		       a.model, a.system_prompt, a.example_user_prompt,
+		       a.is_active, a.provider_name, a.created_at, a.updated_at
+		FROM assistants a
+		JOIN categories c ON a.category_id = c.id
+	`
 
 func (r *AssistantRepo) Create(ctx context.Context, a *domain.Assistant) error {
 	query := `
-		INSERT INTO assistants (category_id, name, description, model, system_prompt, example_user_prompt, is_active)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, created_at, updated_at
-	`
+			INSERT INTO assistants (category_id, name, description, model, system_prompt, example_user_prompt, is_active, provider_name)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			RETURNING id, created_at, updated_at
+		`
 	return r.pool.QueryRow(ctx, query,
 		a.CategoryID, a.Name, a.Description, a.Model,
-		a.SystemPrompt, a.ExampleUserPrompt, a.IsActive,
+		a.SystemPrompt, a.ExampleUserPrompt, a.IsActive, a.ProviderName,
 	).Scan(&a.ID, &a.CreatedAt, &a.UpdatedAt)
 }
 
@@ -47,15 +47,15 @@ func (r *AssistantRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Assi
 
 func (r *AssistantRepo) Update(ctx context.Context, a *domain.Assistant) error {
 	query := `
-		UPDATE assistants 
-		SET category_id=$1, name=$2, description=$3, model=$4, 
-		    system_prompt=$5, example_user_prompt=$6, is_active=$7, updated_at=NOW()
-		WHERE id=$8
-		RETURNING updated_at
-	`
+			UPDATE assistants
+			SET category_id=$1, name=$2, description=$3, model=$4,
+			    system_prompt=$5, example_user_prompt=$6, is_active=$7, provider_name=$8, updated_at=NOW()
+			WHERE id=$9
+			RETURNING updated_at
+		`
 	err := r.pool.QueryRow(ctx, query,
 		a.CategoryID, a.Name, a.Description, a.Model,
-		a.SystemPrompt, a.ExampleUserPrompt, a.IsActive, a.ID,
+		a.SystemPrompt, a.ExampleUserPrompt, a.IsActive, a.ProviderName, a.ID,
 	).Scan(&a.UpdatedAt)
 
 	if err != nil {
@@ -137,7 +137,7 @@ func (r *AssistantRepo) scanAssistant(row pgx.Row) (*domain.Assistant, error) {
 	err := row.Scan(
 		&a.ID, &a.CategoryID, &a.CategoryName, &a.Name, &a.Description,
 		&a.Model, &a.SystemPrompt, &a.ExampleUserPrompt,
-		&a.IsActive, &a.CreatedAt, &a.UpdatedAt,
+		&a.IsActive, &a.ProviderName, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

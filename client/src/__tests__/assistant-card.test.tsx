@@ -15,6 +15,7 @@ const mockAssistant: Assistant = {
   systemPrompt: 'You are a chef',
   exampleUserPrompt: 'chicken, rice, tomatoes',
   isActive: true,
+  providerName: 'mock',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: null,
 }

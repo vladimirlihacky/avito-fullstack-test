@@ -18,16 +18,16 @@ type runRepo interface {
 }
 
 type RunService struct {
-	runRepo       runRepo
-	assistantRepo assistantRepo
-	llmProvider   domain.LLMProvider
+	runRepo          runRepo
+	assistantRepo    assistantRepo
+	providerRegistry domain.ProviderRegistry
 }
 
-func NewRunService(runRepo runRepo, assistantRepo assistantRepo, llmProvider domain.LLMProvider) *RunService {
+func NewRunService(runRepo runRepo, assistantRepo assistantRepo, registry domain.ProviderRegistry) *RunService {
 	return &RunService{
-		runRepo:       runRepo,
-		assistantRepo: assistantRepo,
-		llmProvider:   llmProvider,
+		runRepo:          runRepo,
+		assistantRepo:    assistantRepo,
+		providerRegistry: registry,
 	}
 }
 
@@ -58,10 +58,24 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 		return nil, domain.ErrInternal
 	}
 
+	llmProvider, err := s.providerRegistry.Get(assistant.ProviderName)
+	if err != nil {
+		metrics.RunDuration.WithLabelValues("failed").Observe(time.Since(startTime).Seconds())
+
+		errMsg := domain.ErrProviderNotFound.Error()
+
+		run.Status = domain.RunStatusFailed
+		run.Error = &errMsg
+		if updateErr := s.runRepo.Update(ctx, run); updateErr != nil {
+			fmt.Printf("LLM run update status fail: %v", updateErr)
+		}
+		return run, domain.ErrProviderNotFound
+	}
+
 	llmCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	resp := s.llmProvider.Complete(llmCtx, domain.LLMRequest{
+	resp := llmProvider.Complete(llmCtx, domain.LLMRequest{
 		Model:        assistant.Model,
 		SystemPrompt: assistant.SystemPrompt,
 		UserPrompt:   userPrompt,
@@ -92,7 +106,6 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 	return run, nil
 }
 
-// RunService метод
 func (s *RunService) CreateStream(ctx context.Context, assistantID uuid.UUID, userID uuid.UUID, userPrompt string) (*domain.Run, *domain.LLMResponseStream, error) {
 	assistant, err := s.assistantRepo.GetByID(ctx, assistantID)
 	if err != nil {
@@ -113,6 +126,17 @@ func (s *RunService) CreateStream(ctx context.Context, assistantID uuid.UUID, us
 		return nil, nil, domain.ErrInternal
 	}
 
+	llmProvider, err := s.providerRegistry.Get(assistant.ProviderName)
+	if err != nil {
+		run.Status = domain.RunStatusFailed
+		errMsg := domain.ErrProviderNotFound.Error()
+		run.Error = &errMsg
+		if updateErr := s.runRepo.Update(ctx, run); updateErr != nil {
+			fmt.Printf("LLM stream run update status fail: %v", updateErr)
+		}
+		return run, nil, domain.ErrProviderNotFound
+	}
+
 	outputChan := make(chan string)
 	errorChan := make(chan error, 1)
 
@@ -123,7 +147,7 @@ func (s *RunService) CreateStream(ctx context.Context, assistantID uuid.UUID, us
 		llmCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		streamResp := s.llmProvider.CompleteStream(llmCtx, domain.LLMRequest{
+		streamResp := llmProvider.CompleteStream(llmCtx, domain.LLMRequest{
 			Model:        assistant.Model,
 			SystemPrompt: assistant.SystemPrompt,
 			UserPrompt:   userPrompt,
@@ -171,6 +195,7 @@ func (s *RunService) CreateStream(ctx context.Context, assistantID uuid.UUID, us
 
 	return run, &domain.LLMResponseStream{OutputChan: outputChan, ErrorChan: errorChan}, nil
 }
+
 func (s *RunService) List(ctx context.Context, f domain.RunFilter) ([]*domain.Run, int, error) {
 	runs, total, err := s.runRepo.List(ctx, f)
 

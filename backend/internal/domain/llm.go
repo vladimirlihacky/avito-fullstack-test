@@ -22,3 +22,8 @@ type LLMProvider interface {
 	Complete(ctx context.Context, req LLMRequest) LLMResponse
 	CompleteStream(ctx context.Context, req LLMRequest) LLMResponseStream
 }
+
+type ProviderRegistry interface {
+	Get(name string) (LLMProvider, error)
+	Exists(name string) bool
+}

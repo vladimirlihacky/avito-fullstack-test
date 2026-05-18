@@ -1,16 +1,13 @@
 package main
 
 import (
-	"backend/internal/domain"
 	"backend/internal/handler"
-	"backend/internal/llm/mock"
-	"backend/internal/llm/openai"
+	"backend/internal/provider"
 	"backend/internal/repo/postgres"
 	"backend/internal/service"
 	"context"
+	"fmt"
 	"os"
-	"strconv"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -25,6 +22,21 @@ func main() {
 		JWTSecret = "secret"
 	}
 
+	configPath := os.Getenv("PROVIDERS_CONFIG_PATH")
+	if configPath == "" {
+		configPath = "./backend/providers.yml"
+	}
+
+	providersCfg, err := provider.LoadConfig(configPath)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to load providers config: %v", err))
+	}
+
+	registry := provider.NewRegistry(providersCfg)
+	if len(registry.List()) == 0 {
+		panic("No providers configured")
+	}
+
 	pool, err := pgxpool.New(context.Background(), dbURL)
 	if err != nil {
 		panic(err)
@@ -36,44 +48,17 @@ func main() {
 	runRepo := postgres.NewRunRepo(pool)
 	categoryRepo := postgres.NewCategoryRepo(pool)
 
-	provider := os.Getenv("LLM_PROVIDER")
-	var llmProvider domain.LLMProvider
-	switch provider {
-	case "openai":
-		openaiBaseURL := os.Getenv("OPENAI_BASE_URL")
-		openaiAPIKey := os.Getenv("OPENAI_API_KEY")
-
-		if openaiBaseURL == "" || openaiAPIKey == "" {
-			panic("OpenAI base URL and API key must be provided")
-		}
-		llmProvider = openai.NewProvider(
-			openaiBaseURL,
-			openaiAPIKey,
-		)
-	default:
-		latency := os.Getenv("MOCK_LLM_LATENCY")
-		if latency == "" {
-			latency = "800"
-		}
-
-		latencyMs, err := strconv.Atoi(latency)
-		if err != nil {
-			panic("Invalid latency value")
-		}
-
-		llmProvider = mock.NewProvider(time.Duration(latencyMs) * time.Millisecond)
-	}
-
 	authService := service.NewAuthService(userRepo, JWTSecret)
 	categoryService := service.NewCategoryService(categoryRepo)
-	runService := service.NewRunService(runRepo, assistantRepo, llmProvider)
-	assistantService := service.NewAssistantService(assistantRepo, categoryRepo)
+	runService := service.NewRunService(runRepo, assistantRepo, registry)
+	assistantService := service.NewAssistantService(assistantRepo, categoryRepo, registry)
 
 	h := handler.New(
 		runService,
 		authService,
 		categoryService,
 		assistantService,
+		registry,
 		JWTSecret,
 	)
 	h.SetupRoutes()

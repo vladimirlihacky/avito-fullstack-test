@@ -158,3 +158,22 @@ func ptrStr(s string) *string {
 func getMockUUID() uuid.UUID {
 	return uuid.New()
 }
+
+type MockProviderRegistry struct {
+	mock.Mock
+}
+
+func (m *MockProviderRegistry) Get(name string) (domain.LLMProvider, error) {
+	args := m.Called(name)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(domain.LLMProvider), args.Error(1)
+}
+
+func (m *MockProviderRegistry) Exists(name string) bool {
+	args := m.Called(name)
+	return args.Bool(0)
+}
+
+

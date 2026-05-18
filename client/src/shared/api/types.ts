@@ -1,6 +1,17 @@
 export type Role = 'admin' | 'user'
 export type RunStatus = 'pending' | 'success' | 'failed'
 
+export type Provider = {
+  name: string
+  type: string
+  models: string[]
+  available: boolean
+}
+
+export type ProvidersResponse = {
+  providers: Provider[]
+}
+
 export type ApiError = {
   error: {
     code: string
@@ -66,6 +77,7 @@ export type Assistant = {
   systemPrompt: string | null
   exampleUserPrompt: string | null
   isActive: boolean
+  providerName: string
   createdAt: string | null
   updatedAt: string | null
 }
@@ -78,6 +90,7 @@ export type AssistantCreateInput = {
   systemPrompt: string
   exampleUserPrompt?: string | null
   isActive?: boolean
+  providerName: string
 }
 
 export type AssistantUpdateInput = {
@@ -88,6 +101,7 @@ export type AssistantUpdateInput = {
   systemPrompt: string
   exampleUserPrompt?: string | null
   isActive: boolean
+  providerName: string
 }
 
 export type AssistantsListParams = {

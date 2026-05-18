@@ -13,6 +13,7 @@ import type {
   CategoryCreateInput,
   DummyLoginInput,
   LoginInput,
+  ProvidersResponse,
   RegisterInput,
   RunsListParams,
   RunsResponse,
@@ -91,6 +92,10 @@ export const assistantsApi = {
     }
     return response.body!.getReader()
   },
+}
+
+export const providersApi = {
+  list: (): Promise<ProvidersResponse> => apiFetch('/providers'),
 }
 
 export const runsApi = {
