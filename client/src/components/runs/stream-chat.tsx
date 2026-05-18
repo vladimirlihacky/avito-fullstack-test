@@ -38,7 +38,6 @@ export function StreamChat({ assistantId, disabled }: Props) {
     [start],
   )
 
-  // Derive messages from state during render — no effect needed
   const messages: Message[] = prompts.map((p) => ({
     role: 'user' as const,
     content: p,

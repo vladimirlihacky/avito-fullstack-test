@@ -9,9 +9,7 @@ services:
     environment:
       POSTGRES_USER: "${POSTGRES_USER:-postgres}"
       POSTGRES_DB: "${POSTGRES_DB:-postgres}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-password}"
-    ports:
-      - "${DATABASE_PORT:-5432}:5432"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
       - postgres_data:/var/lib/postgresql
     command: postgres -c shared_preload_libraries=pg_stat_statements
@@ -22,7 +20,7 @@ services:
       - ./backend/migrations:/migrations
     command:
       - -path=/migrations/
-      - -database=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@database:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      - -database=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-postgres}?sslmode=disable
       - up
     depends_on:
       database:
@@ -31,13 +29,10 @@ services:
   mcp-proxy:
     build:
       context: ./mcp
-    depends_on:
-      backend:
-        condition: service_started
     environment:
       UPSTREAM_URL: "${UPSTREAM_URL:-https://api.deepseek.com/v1}"
       UPSTREAM_API_KEY: "${DEEPSEEK_API_KEY:-}"
-      MAX_TOOL_ROUNDS: "10"
+      MAX_TOOL_ROUNDS: "5"
       PROXY_PORT: "8090"
     volumes:
       - .:/project:ro
@@ -51,34 +46,13 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
     environment:
       PROVIDERS_CONFIG_PATH: "/providers.yml"
       DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
-      JWT_SECRET: "${JWT_SECRET:-secret}"
-      BACKEND_PORT: "${BACKEND_PORT:-8080}"
-      ENABLE_DUMMY_LOGIN: "${ENABLE_DUMMY_LOGIN:-true}"
-      DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@database:5432/${POSTGRES_DB:-postgres}?sslmode=disable"
-
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-    ports:
-      - "3001:3000"
-    depends_on:
-      - prometheus
+      JWT_SECRET: "${JWT_SECRET}"
+      BACKEND_PORT: "8080"
+      ENABLE_DUMMY_LOGIN: "false"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-postgres}?sslmode=disable"
 
   frontend:
     build:
@@ -86,7 +60,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${CLIENT_PORT:-3000}:80"
+      - "80:80"
     environment:
       VITE_API_BASE_URL: "/api"
 

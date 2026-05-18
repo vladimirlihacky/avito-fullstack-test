@@ -11,3 +11,10 @@ providers:
     models:
       - deepseek-chat
       - deepseek-reasoner
+
+  - name: guide
+    type: openai
+    base_url: http://mcp-proxy:8090/v1
+    api_key_env: DEEPSEEK_API_KEY
+    models:
+      - deepseek-chat

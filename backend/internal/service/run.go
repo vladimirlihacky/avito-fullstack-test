@@ -72,7 +72,7 @@ func (s *RunService) Create(ctx context.Context, assistantID uuid.UUID, userID u
 		return run, domain.ErrProviderNotFound
 	}
 
-	llmCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	llmCtx, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()
 
 	resp := llmProvider.Complete(llmCtx, domain.LLMRequest{
