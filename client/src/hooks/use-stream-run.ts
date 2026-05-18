@@ -39,7 +39,7 @@ export function useStreamRun(assistantId: string) {
 
   return {
     chunks,
-    output: chunks.join(''),
+    output: chunks.join('\n'),
     isStreaming,
     error,
     runId,

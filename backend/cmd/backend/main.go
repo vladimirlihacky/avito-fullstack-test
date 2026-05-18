@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -21,6 +22,8 @@ func main() {
 	if JWTSecret == "" {
 		JWTSecret = "secret"
 	}
+
+	enableDummyLogin := strings.EqualFold(os.Getenv("ENABLE_DUMMY_LOGIN"), "true")
 
 	configPath := os.Getenv("PROVIDERS_CONFIG_PATH")
 	if configPath == "" {
@@ -60,6 +63,7 @@ func main() {
 		assistantService,
 		registry,
 		JWTSecret,
+		enableDummyLogin,
 	)
 	h.SetupRoutes()
 	if err := h.Listen(":8080"); err != nil {

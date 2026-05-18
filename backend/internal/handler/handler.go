@@ -37,14 +37,15 @@ type assistantService interface {
 }
 
 type Handler struct {
-	r                *chi.Mux
-	validate         *validator.Validate
-	runService       runService
-	authService      authService
-	categoryService  categoryService
-	assistantService assistantService
-	providerService  providerLister
-	authSecret       string
+	r                  *chi.Mux
+	validate           *validator.Validate
+	runService         runService
+	authService        authService
+	categoryService    categoryService
+	assistantService   assistantService
+	providerService    providerLister
+	authSecret         string
+	enableDummyLogin   bool
 }
 
 func New(
@@ -54,6 +55,7 @@ func New(
 	assistantService assistantService,
 	providerService providerLister,
 	authSecret string,
+	enableDummyLogin bool,
 ) *Handler {
 	validate := validator.New()
 
@@ -65,6 +67,7 @@ func New(
 		assistantService: assistantService,
 		providerService:  providerService,
 		authSecret:       authSecret,
+		enableDummyLogin: enableDummyLogin,
 	}
 }
 
@@ -90,7 +93,9 @@ func (h *Handler) SetupRoutes() {
 	//Auth routes
 	r.Post("/login", h.Login)
 	r.Post("/register", h.Register)
-	r.Post("/dummyLogin", h.DummyLogin)
+	if h.enableDummyLogin {
+		r.Post("/dummyLogin", h.DummyLogin)
+	}
 
 	// Protected routes
 	r.Route("/", func(r chi.Router) {

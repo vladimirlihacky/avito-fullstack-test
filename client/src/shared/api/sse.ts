@@ -32,7 +32,6 @@ export async function* parseSSEStream(
       } else if (line === '' && eventType) {
         try {
           if (eventType === 'chunk') {
-            // chunk data is raw text, not JSON
             yield { type: 'chunk', data }
           } else if (eventType === 'run_start') {
             yield { type: 'run_start', data: JSON.parse(data) as RunStartData }

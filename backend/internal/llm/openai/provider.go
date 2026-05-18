@@ -28,8 +28,6 @@ func NewProvider(baseURL, apiKey string) domain.LLMProvider {
 }
 
 func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) domain.LLMResponse {
-	llmResponse := domain.LLMResponse{}
-
 	chatCompletion, err := p.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Model: req.Model,
 		Messages: []openai.ChatCompletionMessageParamUnion{
@@ -38,10 +36,13 @@ func (p *Provider) Complete(ctx context.Context, req domain.LLMRequest) domain.L
 		},
 	})
 
-	llmResponse.Error = err
-	llmResponse.Output = chatCompletion.Choices[0].Message.Content
+	if err != nil {
+		return domain.LLMResponse{Error: err}
+	}
 
-	return llmResponse
+	return domain.LLMResponse{
+		Output: chatCompletion.Choices[0].Message.Content,
+	}
 }
 
 func (p *Provider) CompleteStream(ctx context.Context, req domain.LLMRequest) domain.LLMResponseStream {
