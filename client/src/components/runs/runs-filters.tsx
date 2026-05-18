@@ -14,12 +14,19 @@ type Props = {
   onAssistantFilter?: (value: string) => void
 }
 
-export function RunsFilters({ status, onStatusChange, assistantFilter, onAssistantFilter }: Props) {
+export function RunsFilters({
+  status,
+  onStatusChange,
+  assistantFilter,
+  onAssistantFilter,
+}: Props) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
       <select
         value={status ?? ''}
-        onChange={(e) => onStatusChange((e.target.value as RunStatus) || undefined)}
+        onChange={(e) =>
+          onStatusChange((e.target.value as RunStatus) || undefined)
+        }
         className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       >
         {statusOptions.map((o) => (

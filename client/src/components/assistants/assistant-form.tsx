@@ -27,7 +27,9 @@ export function AssistantForm({ initial }: Props) {
   const [description, setDescription] = useState(initial?.description ?? '')
   const [model, setModel] = useState(initial?.model ?? '')
   const [systemPrompt, setSystemPrompt] = useState(initial?.systemPrompt ?? '')
-  const [exampleUserPrompt, setExampleUserPrompt] = useState(initial?.exampleUserPrompt ?? '')
+  const [exampleUserPrompt, setExampleUserPrompt] = useState(
+    initial?.exampleUserPrompt ?? '',
+  )
   const [isActive, setIsActive] = useState(initial?.isActive ?? true)
 
   const handleSubmit = (e: FormEvent) => {
@@ -59,7 +61,12 @@ export function AssistantForm({ initial }: Props) {
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="name">Name *</FieldLabel>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </Field>
 
         <Field>
@@ -74,15 +81,25 @@ export function AssistantForm({ initial }: Props) {
 
         <Field>
           <FieldLabel htmlFor="category">Category *</FieldLabel>
-          <CategorySelect value={categoryId} onChange={(v) => setCategoryId(v ?? '')} />
+          <CategorySelect
+            value={categoryId}
+            onChange={(v) => setCategoryId(v ?? '')}
+          />
           {!categoryId && (
-            <p className="text-xs text-destructive mt-1">Category is required</p>
+            <p className="text-xs text-destructive mt-1">
+              Category is required
+            </p>
           )}
         </Field>
 
         <Field>
           <FieldLabel htmlFor="model">Model *</FieldLabel>
-          <Input id="model" value={model} onChange={(e) => setModel(e.target.value)} required />
+          <Input
+            id="model"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            required
+          />
         </Field>
 
         <Field>
@@ -98,7 +115,9 @@ export function AssistantForm({ initial }: Props) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="exampleUserPrompt">Example user prompt</FieldLabel>
+          <FieldLabel htmlFor="exampleUserPrompt">
+            Example user prompt
+          </FieldLabel>
           <textarea
             id="exampleUserPrompt"
             value={exampleUserPrompt}
@@ -124,7 +143,11 @@ export function AssistantForm({ initial }: Props) {
 
         <Field>
           <Button type="submit" disabled={pending || !categoryId}>
-            {pending ? 'Saving...' : isEdit ? 'Save changes' : 'Create assistant'}
+            {pending
+              ? 'Saving...'
+              : isEdit
+                ? 'Save changes'
+                : 'Create assistant'}
           </Button>
         </Field>
       </FieldGroup>

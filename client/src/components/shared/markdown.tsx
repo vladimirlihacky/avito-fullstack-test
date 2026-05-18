@@ -9,10 +9,10 @@ type Props = {
 
 export function Markdown({ children, className }: Props) {
   return (
-    <div className={cn('prose prose-sm dark:prose-invert max-w-none', className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {children}
-      </ReactMarkdown>
+    <div
+      className={cn('prose prose-sm dark:prose-invert max-w-none', className)}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
     </div>
   )
 }

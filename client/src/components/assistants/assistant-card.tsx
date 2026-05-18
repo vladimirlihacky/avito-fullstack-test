@@ -32,7 +32,9 @@ export function AssistantCard({ assistant }: Props) {
                 {assistant.categoryName}
               </span>
             )}
-            <span className="text-xs text-muted-foreground">{assistant.model}</span>
+            <span className="text-xs text-muted-foreground">
+              {assistant.model}
+            </span>
           </div>
         </CardContent>
       </Card>

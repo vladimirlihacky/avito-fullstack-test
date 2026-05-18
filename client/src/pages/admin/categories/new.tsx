@@ -20,9 +20,11 @@ export default function CreateCategoryPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
-    categoriesModel.create.fx({ name: name.trim(), description: description || null }).then(() => {
-      navigate('/assistants', { replace: true })
-    })
+    categoriesModel.create
+      .fx({ name: name.trim(), description: description || null })
+      .then(() => {
+        navigate('/assistants', { replace: true })
+      })
   }
 
   return (

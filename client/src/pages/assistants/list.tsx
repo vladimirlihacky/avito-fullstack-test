@@ -8,7 +8,14 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { AssistantFilters } from '@/components/assistants/assistant-filters'
 import { AssistantGrid } from '@/components/assistants/assistant-grid'
 import { AssistantCard } from '@/components/assistants/assistant-card'
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router'
@@ -41,7 +48,9 @@ export default function AssistantListPage() {
     assistantsModel.list.fx(params)
   }, [search, categoryId, includeInactive, page, pageSize])
 
-  const totalPages = data ? Math.ceil(data.pagination.total / data.pagination.pageSize) : 0
+  const totalPages = data
+    ? Math.ceil(data.pagination.total / data.pagination.pageSize)
+    : 0
 
   return (
     <div className="p-6">
@@ -62,7 +71,9 @@ export default function AssistantListPage() {
         includeInactive={includeInactive}
         onSearchChange={(v) => setParams({ q: v || null, page: 1 })}
         onCategoryChange={(v) => setParams({ categoryId: v, page: 1 })}
-        onIncludeInactiveChange={(v) => setParams({ includeInactive: v || null, page: 1 })}
+        onIncludeInactiveChange={(v) =>
+          setParams({ includeInactive: v || null, page: 1 })
+        }
       />
 
       {(pending || !data) && (
@@ -86,7 +97,15 @@ export default function AssistantListPage() {
           {error && (
             <ErrorBlock
               message={error.message}
-              onRetry={() => assistantsModel.list.fx({ page, pageSize, q: search, categoryId, includeInactive })}
+              onRetry={() =>
+                assistantsModel.list.fx({
+                  page,
+                  pageSize,
+                  q: search,
+                  categoryId,
+                  includeInactive,
+                })
+              }
             />
           )}
           <AssistantGrid>
@@ -106,13 +125,19 @@ export default function AssistantListPage() {
                   </PaginationItem>
                 )}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => Math.abs(p - page) <= 2 || p === 1 || p === totalPages)
+                  .filter(
+                    (p) =>
+                      Math.abs(p - page) <= 2 || p === 1 || p === totalPages,
+                  )
                   .map((p, idx, arr) => (
                     <PaginationItem key={p}>
                       {idx > 0 && arr[idx - 1] !== p - 1 && (
                         <span className="px-2 text-muted-foreground">...</span>
                       )}
-                      <PaginationLink isActive={p === page} onClick={() => setParams({ page: p })}>
+                      <PaginationLink
+                        isActive={p === page}
+                        onClick={() => setParams({ page: p })}
+                      >
                         {p}
                       </PaginationLink>
                     </PaginationItem>

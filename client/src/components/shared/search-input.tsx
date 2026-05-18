@@ -9,7 +9,12 @@ type Props = {
   debounceMs?: number
 }
 
-export function SearchInput({ value, onChange, placeholder = 'Search...', debounceMs = 300 }: Props) {
+export function SearchInput({
+  value,
+  onChange,
+  placeholder = 'Search...',
+  debounceMs = 300,
+}: Props) {
   const [local, setLocal] = useState(value)
 
   // Sync external value reset into local state
@@ -39,4 +44,3 @@ export function SearchInput({ value, onChange, placeholder = 'Search...', deboun
     </div>
   )
 }
-

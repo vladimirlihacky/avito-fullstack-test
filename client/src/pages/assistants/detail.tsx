@@ -73,10 +73,7 @@ export default function AssistantDetailPage() {
                 <CardTitle className="text-lg">Run assistant</CardTitle>
               </CardHeader>
               <CardContent className="h-[calc(100%-4rem)]">
-                <StreamChat
-                  assistantId={id}
-                  disabled={!assistant.isActive}
-                />
+                <StreamChat assistantId={id} disabled={!assistant.isActive} />
               </CardContent>
             </Card>
           </div>

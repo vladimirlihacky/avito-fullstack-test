@@ -40,10 +40,14 @@ function renderWithRouter(el: React.ReactElement) {
 
 describe('AssistantCard', () => {
   test('renders assistant name, description, category and model', () => {
-    const container = renderWithRouter(<AssistantCard assistant={mockAssistant} />)
+    const container = renderWithRouter(
+      <AssistantCard assistant={mockAssistant} />,
+    )
 
     expect(container.textContent).toContain('Chef Bot')
-    expect(container.textContent).toContain('Creates delicious recipes from ingredients')
+    expect(container.textContent).toContain(
+      'Creates delicious recipes from ingredients',
+    )
     expect(container.textContent).toContain('Cooking')
     expect(container.textContent).toContain('gpt-4o-mini')
   })
@@ -56,7 +60,9 @@ describe('AssistantCard', () => {
   })
 
   test('links to assistant detail page', () => {
-    const container = renderWithRouter(<AssistantCard assistant={mockAssistant} />)
+    const container = renderWithRouter(
+      <AssistantCard assistant={mockAssistant} />,
+    )
 
     const link = container.querySelector('a')!
     expect(link.getAttribute('href')).toBe(`/assistants/${mockAssistant.id}`)

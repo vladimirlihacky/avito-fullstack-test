@@ -32,8 +32,14 @@ export const router = createBrowserRouter([
             Component: AdminGuard,
             children: [
               { path: 'admin/categories/new', element: <CreateCategoryPage /> },
-              { path: 'admin/assistants/new', element: <CreateAssistantPage /> },
-              { path: 'admin/assistants/:id/edit', element: <EditAssistantPage /> },
+              {
+                path: 'admin/assistants/new',
+                element: <CreateAssistantPage />,
+              },
+              {
+                path: 'admin/assistants/:id/edit',
+                element: <EditAssistantPage />,
+              },
               { path: 'admin/runs', element: <AdminRunsPage /> },
             ],
           },

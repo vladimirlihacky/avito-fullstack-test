@@ -23,7 +23,9 @@ function isActiveUrl(pathname: string, url: string) {
   return pathname.startsWith(url)
 }
 
-export default function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export default function MainSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const isAdmin = useUnit($isAdmin)
   const user = useUnit($authUser)
   const handleLogout = useUnit(logoutEvent)
@@ -65,7 +67,10 @@ export default function MainSidebar({ ...props }: React.ComponentProps<typeof Si
           <SidebarMenu>
             {userItems.map((item) => (
               <SidebarMenuItem key={item.url}>
-                <SidebarMenuButton asChild isActive={isActiveUrl(pathname, item.url)}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActiveUrl(pathname, item.url)}
+                >
                   <Link to={item.url}>{item.title}</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -85,7 +90,10 @@ export default function MainSidebar({ ...props }: React.ComponentProps<typeof Si
               </SidebarMenuItem>
               {adminItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActiveUrl(pathname, item.url)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActiveUrl(pathname, item.url)}
+                  >
                     <Link to={item.url}>{item.title}</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -98,7 +106,9 @@ export default function MainSidebar({ ...props }: React.ComponentProps<typeof Si
         {user && (
           <div className="px-3 py-2">
             <p className="text-xs font-medium truncate">{user.email}</p>
-            <p className="text-[10px] text-muted-foreground capitalize">{user.role}</p>
+            <p className="text-[10px] text-muted-foreground capitalize">
+              {user.role}
+            </p>
           </div>
         )}
         <SidebarMenu>

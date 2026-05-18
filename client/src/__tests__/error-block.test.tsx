@@ -25,9 +25,7 @@ describe('ErrorBlock', () => {
 
   test('calls onRetry when retry button clicked', () => {
     const onRetry = mock(() => {})
-    const container = render(
-      <ErrorBlock message="Error" onRetry={onRetry} />,
-    )
+    const container = render(<ErrorBlock message="Error" onRetry={onRetry} />)
     const btn = container.querySelector('button')!
     act(() => btn.click())
     expect(onRetry).toHaveBeenCalledTimes(1)

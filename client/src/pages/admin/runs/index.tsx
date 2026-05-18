@@ -7,7 +7,14 @@ import { ErrorBlock } from '@/components/shared/error-block'
 import { EmptyState } from '@/components/shared/empty-state'
 import { RunsTable } from '@/components/runs/runs-table'
 import { RunsFilters } from '@/components/runs/runs-filters'
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PlayIcon } from 'lucide-react'
 import type { RunStatus } from '@/shared/api/types'
@@ -31,11 +38,16 @@ export default function AdminRunsPage() {
     runsModel.admin.fx(params)
   }, [status, page, pageSize])
 
-  const totalPages = data ? Math.ceil(data.pagination.total / data.pagination.pageSize) : 0
+  const totalPages = data
+    ? Math.ceil(data.pagination.total / data.pagination.pageSize)
+    : 0
 
   return (
     <div className="p-6">
-      <PageHeader title="All Runs" description="View all assistant runs across users" />
+      <PageHeader
+        title="All Runs"
+        description="View all assistant runs across users"
+      />
 
       <RunsFilters
         status={status}
@@ -75,24 +87,34 @@ export default function AdminRunsPage() {
               <PaginationContent>
                 {page > 1 && (
                   <PaginationItem>
-                    <PaginationPrevious onClick={() => setParams({ page: page - 1 })} />
+                    <PaginationPrevious
+                      onClick={() => setParams({ page: page - 1 })}
+                    />
                   </PaginationItem>
                 )}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => Math.abs(p - page) <= 2 || p === 1 || p === totalPages)
+                  .filter(
+                    (p) =>
+                      Math.abs(p - page) <= 2 || p === 1 || p === totalPages,
+                  )
                   .map((p, idx, arr) => (
                     <PaginationItem key={p}>
                       {idx > 0 && arr[idx - 1] !== p - 1 && (
                         <span className="px-2 text-muted-foreground">...</span>
                       )}
-                      <PaginationLink isActive={p === page} onClick={() => setParams({ page: p })}>
+                      <PaginationLink
+                        isActive={p === page}
+                        onClick={() => setParams({ page: p })}
+                      >
                         {p}
                       </PaginationLink>
                     </PaginationItem>
                   ))}
                 {page < totalPages && (
                   <PaginationItem>
-                    <PaginationNext onClick={() => setParams({ page: page + 1 })} />
+                    <PaginationNext
+                      onClick={() => setParams({ page: page + 1 })}
+                    />
                   </PaginationItem>
                 )}
               </PaginationContent>

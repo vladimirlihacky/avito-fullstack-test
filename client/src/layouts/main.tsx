@@ -1,6 +1,10 @@
-import MainSidebar from "@/components/layout/sidebar"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { Outlet } from "react-router"
+import MainSidebar from '@/components/layout/sidebar'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { Outlet } from 'react-router'
 
 export default function MainLayout() {
   return (

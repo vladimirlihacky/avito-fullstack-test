@@ -12,18 +12,21 @@ type Props = {
   disabled: boolean
 }
 
-type Message = {
-  role: 'user'
-  content: string
-} | {
-  role: 'assistant'
-  content: string
-  isStreaming: boolean
-  isError: boolean
-}
+type Message =
+  | {
+      role: 'user'
+      content: string
+    }
+  | {
+      role: 'assistant'
+      content: string
+      isStreaming: boolean
+      isError: boolean
+    }
 
 export function StreamChat({ assistantId, disabled }: Props) {
-  const { chunks, output, isStreaming, error, start } = useStreamRun(assistantId)
+  const { chunks, output, isStreaming, error, start } =
+    useStreamRun(assistantId)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [prompts, setPrompts] = useState<string[]>([])
 
@@ -36,7 +39,10 @@ export function StreamChat({ assistantId, disabled }: Props) {
   )
 
   // Derive messages from state during render — no effect needed
-  const messages: Message[] = prompts.map((p) => ({ role: 'user' as const, content: p }))
+  const messages: Message[] = prompts.map((p) => ({
+    role: 'user' as const,
+    content: p,
+  }))
 
   if (prompts.length > 0) {
     messages.push({
@@ -95,7 +101,8 @@ export function StreamChat({ assistantId, disabled }: Props) {
                   <Card
                     className={cn(
                       'p-4',
-                      msg.isStreaming && 'border-primary/30 shadow-sm shadow-primary/10',
+                      msg.isStreaming &&
+                        'border-primary/30 shadow-sm shadow-primary/10',
                       msg.isError && 'border-destructive/50 bg-destructive/5',
                     )}
                   >

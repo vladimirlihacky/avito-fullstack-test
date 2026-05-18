@@ -12,7 +12,9 @@ export function AssistantInfo({ assistant }: Props) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Description
+        </h3>
         <p className="text-sm mt-1">{assistant.description}</p>
       </div>
 
@@ -23,7 +25,9 @@ export function AssistantInfo({ assistant }: Props) {
         </div>
         {assistant.categoryName && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Category</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Category
+            </h3>
             <p className="text-sm mt-1">{assistant.categoryName}</p>
           </div>
         )}
@@ -41,7 +45,9 @@ export function AssistantInfo({ assistant }: Props) {
 
       {assistant.exampleUserPrompt && (
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground">Example prompt</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Example prompt
+          </h3>
           <p className="text-sm mt-1 bg-muted rounded-md p-3 font-mono text-xs">
             {assistant.exampleUserPrompt}
           </p>
@@ -50,7 +56,9 @@ export function AssistantInfo({ assistant }: Props) {
 
       {isAdmin && assistant.systemPrompt && (
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground">System prompt</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">
+            System prompt
+          </h3>
           <p className="text-sm mt-1 bg-muted rounded-md p-3 text-xs whitespace-pre-wrap">
             {assistant.systemPrompt}
           </p>

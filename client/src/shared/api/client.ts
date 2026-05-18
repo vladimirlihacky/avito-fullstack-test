@@ -51,28 +51,42 @@ export const assistantsApi = {
   create: (input: AssistantCreateInput): Promise<Assistant> =>
     apiFetch('/assistants', { method: 'POST', body: input }),
 
-  update: (assistantId: string, input: AssistantUpdateInput): Promise<Assistant> =>
+  update: (
+    assistantId: string,
+    input: AssistantUpdateInput,
+  ): Promise<Assistant> =>
     apiFetch(`/assistants/${assistantId}`, { method: 'PUT', body: input }),
 
-  run: (assistantId: string, input: AssistantRunCreateInput): Promise<AssistantRun> =>
+  run: (
+    assistantId: string,
+    input: AssistantRunCreateInput,
+  ): Promise<AssistantRun> =>
     apiFetch(`/assistants/${assistantId}/run`, { method: 'POST', body: input }),
 
-  stream: async (assistantId: string, input: AssistantRunCreateInput): Promise<ReadableStreamDefaultReader<Uint8Array>> => {
+  stream: async (
+    assistantId: string,
+    input: AssistantRunCreateInput,
+  ): Promise<ReadableStreamDefaultReader<Uint8Array>> => {
     const token = tokenStorage.get()
-    const response = await fetch(`${BASE_URL}/assistants/${assistantId}/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    const response = await fetch(
+      `${BASE_URL}/assistants/${assistantId}/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(input),
       },
-      body: JSON.stringify(input),
-    })
+    )
     if (!response.ok) {
       let message = 'Stream failed'
       try {
-        const err = await response.json() as { error?: { message?: string } }
+        const err = (await response.json()) as { error?: { message?: string } }
         message = err.error?.message ?? message
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       throw new Error(message)
     }
     return response.body!.getReader()

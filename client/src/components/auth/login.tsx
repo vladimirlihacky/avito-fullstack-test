@@ -5,8 +5,19 @@ import { $currentToken, authModel } from '@/shared/api/model'
 import { cn } from '@/shared/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from '@/components/ui/field'
 
 export default function LoginForm() {
   const navigate = useNavigate()
@@ -20,7 +31,8 @@ export default function LoginForm() {
   const [password, setPassword] = useState('')
 
   if (token) {
-    const to = (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
+    const to =
+      (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
     navigate(to, { replace: true })
     return null
   }
@@ -35,7 +47,9 @@ export default function LoginForm() {
       <Card>
         <CardHeader>
           <CardTitle>Log in</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>

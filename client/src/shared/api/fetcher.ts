@@ -96,10 +96,18 @@ export async function apiFetch<T>(
     try {
       errorBody = (await response.json()) as ApiError
     } catch {
-      throw new ApiRequestError(response.status, 'INTERNAL_ERROR', response.statusText)
+      throw new ApiRequestError(
+        response.status,
+        'INTERNAL_ERROR',
+        response.statusText,
+      )
     }
 
-    throw new ApiRequestError(response.status, errorBody.error.code, errorBody.error.message)
+    throw new ApiRequestError(
+      response.status,
+      errorBody.error.code,
+      errorBody.error.message,
+    )
   }
 
   if (response.status === 204) {

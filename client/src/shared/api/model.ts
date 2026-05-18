@@ -1,5 +1,11 @@
 import { createEffect, createEvent, createStore, sample } from 'effector'
-import { authApi, assistantsApi, categoriesApi, runsApi, systemApi } from './client'
+import {
+  authApi,
+  assistantsApi,
+  categoriesApi,
+  runsApi,
+  systemApi,
+} from './client'
 import { authStorage, tokenStorage } from './fetcher'
 import type {
   AdminRunsListParams,
@@ -21,7 +27,10 @@ import type {
 function createQuery<Params, Data>(fn: (params: Params) => Promise<Data>) {
   const fx = createEffect(fn)
 
-  const $data = createStore<Data | null>(null).on(fx.doneData, (_, data) => data)
+  const $data = createStore<Data | null>(null).on(
+    fx.doneData,
+    (_, data) => data,
+  )
   const $pending = fx.pending
   const $error = createStore<Error | null>(null)
     .on(fx.failData, (_, err) => err)
@@ -79,8 +88,7 @@ export const $isAuthenticated = $currentToken.map(Boolean)
 export const $isAdmin = $currentToken.map((t) => t?.user.role === 'admin')
 export const $authUser = $currentToken.map((t) => t?.user ?? null)
 
-export const $authReady = createStore(false)
-  .on(initAuthFx.finally, () => true)
+export const $authReady = createStore(false).on(initAuthFx.finally, () => true)
 
 export const logoutEvent = createEvent()
 
@@ -97,7 +105,6 @@ sample({
 export function initAuth() {
   initAuthFx()
 }
-
 
 const listCategoriesFx = createEffect(categoriesApi.list)
 const createCategoryFx = createEffect(categoriesApi.create)
@@ -129,8 +136,8 @@ sample({
   target: listCategoriesFx,
 })
 
-const listAssistantsFx = createEffect(
-  (params: AssistantsListParams = {}) => assistantsApi.list(params),
+const listAssistantsFx = createEffect((params: AssistantsListParams = {}) =>
+  assistantsApi.list(params),
 )
 
 const getAssistantFx = createEffect((assistantId: string) =>
@@ -142,13 +149,23 @@ const createAssistantFx = createEffect((input: AssistantCreateInput) =>
 )
 
 const updateAssistantFx = createEffect(
-  ({ assistantId, input }: { assistantId: string; input: AssistantUpdateInput }) =>
-    assistantsApi.update(assistantId, input),
+  ({
+    assistantId,
+    input,
+  }: {
+    assistantId: string
+    input: AssistantUpdateInput
+  }) => assistantsApi.update(assistantId, input),
 )
 
 const runAssistantFx = createEffect(
-  ({ assistantId, input }: { assistantId: string; input: AssistantRunCreateInput }) =>
-    assistantsApi.run(assistantId, input),
+  ({
+    assistantId,
+    input,
+  }: {
+    assistantId: string
+    input: AssistantRunCreateInput
+  }) => assistantsApi.run(assistantId, input),
 )
 
 const $assistantDetails = createStore<Record<string, Assistant>>({})
@@ -225,7 +242,10 @@ const adminRunsFx = createEffect((params: AdminRunsListParams = {}) =>
 export const runsModel = {
   my: {
     fx: myRunsFx,
-    $data: createStore<RunsResponse | null>(null).on(myRunsFx.doneData, (_, data) => data),
+    $data: createStore<RunsResponse | null>(null).on(
+      myRunsFx.doneData,
+      (_, data) => data,
+    ),
     $pending: myRunsFx.pending,
     $error: createStore<Error | null>(null)
       .on(myRunsFx.failData, (_, err) => err)
@@ -234,7 +254,10 @@ export const runsModel = {
 
   admin: {
     fx: adminRunsFx,
-    $data: createStore<RunsResponse | null>(null).on(adminRunsFx.doneData, (_, data) => data),
+    $data: createStore<RunsResponse | null>(null).on(
+      adminRunsFx.doneData,
+      (_, data) => data,
+    ),
     $pending: adminRunsFx.pending,
     $error: createStore<Error | null>(null)
       .on(adminRunsFx.failData, (_, err) => err)

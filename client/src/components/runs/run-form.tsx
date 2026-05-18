@@ -27,7 +27,9 @@ export function RunForm({ onSubmit, pending, error, disabled }: Props) {
         <textarea
           value={userPrompt}
           onChange={(e) => setUserPrompt(e.target.value)}
-          placeholder={disabled ? 'Assistant is inactive' : 'Enter your prompt...'}
+          placeholder={
+            disabled ? 'Assistant is inactive' : 'Enter your prompt...'
+          }
           required
           rows={2}
           disabled={blocked}
@@ -39,11 +41,18 @@ export function RunForm({ onSubmit, pending, error, disabled }: Props) {
           }}
           className="flex-1 min-h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none"
         />
-        <Button type="submit" size="icon" disabled={blocked || !userPrompt.trim()} className="shrink-0">
+        <Button
+          type="submit"
+          size="icon"
+          disabled={blocked || !userPrompt.trim()}
+          className="shrink-0"
+        >
           <SendIcon className="size-4" />
         </Button>
       </div>
-      {error && <p className="text-sm text-destructive mt-2">{error.message}</p>}
+      {error && (
+        <p className="text-sm text-destructive mt-2">{error.message}</p>
+      )}
     </form>
   )
 }

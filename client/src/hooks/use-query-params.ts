@@ -45,5 +45,11 @@ export function useQueryParams() {
     [setSearchParams],
   )
 
-  return { getString, getNumber, getBoolean, setParams, rawParams: searchParams }
+  return {
+    getString,
+    getNumber,
+    getBoolean,
+    setParams,
+    rawParams: searchParams,
+  }
 }

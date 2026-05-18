@@ -1,4 +1,4 @@
-import DummyLoginForm from "@/components/auth/dummy-login";
+import DummyLoginForm from '@/components/auth/dummy-login'
 
 export default function DummyLoginPage() {
   return (

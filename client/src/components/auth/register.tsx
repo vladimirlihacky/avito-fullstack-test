@@ -5,8 +5,19 @@ import { authModel } from '@/shared/api/model'
 import { cn } from '@/shared/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from '@/components/ui/field'
 
 export default function RegisterForm() {
   const navigate = useNavigate()
@@ -18,7 +29,8 @@ export default function RegisterForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const from = (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
+  const from =
+    (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()

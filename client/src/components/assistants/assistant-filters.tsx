@@ -25,7 +25,11 @@ export function AssistantFilters({
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
       <div className="w-full sm:w-64">
-        <SearchInput value={search} onChange={onSearchChange} placeholder="Search assistants..." />
+        <SearchInput
+          value={search}
+          onChange={onSearchChange}
+          placeholder="Search assistants..."
+        />
       </div>
       <div className="w-full sm:w-48">
         <CategorySelect value={categoryId} onChange={onCategoryChange} />

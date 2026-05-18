@@ -4,7 +4,13 @@ import { authModel } from '@/shared/api/model'
 import type { Role } from '@/shared/api/types'
 import { cn } from '@/shared/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Field, FieldGroup, FieldSeparator } from '@/components/ui/field'
 
 export default function DummyLoginForm() {
@@ -13,7 +19,8 @@ export default function DummyLoginForm() {
   const pending = useUnit(authModel.dummyLogin.$pending)
   const error = useUnit(authModel.dummyLogin.$error)
 
-  const from = (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
+  const from =
+    (location.state as { from?: Location })?.from?.pathname ?? '/assistants'
 
   const handleLogin = (role: Role) => {
     authModel.dummyLogin.fx({ role }).then(() => {
@@ -52,8 +59,14 @@ export default function DummyLoginForm() {
                 Login as User
               </Button>
             </Field>
-            {pending && <p className="text-sm text-muted-foreground text-center">Logging in...</p>}
-            {error && <p className="text-sm text-destructive">{error.message}</p>}
+            {pending && (
+              <p className="text-sm text-muted-foreground text-center">
+                Logging in...
+              </p>
+            )}
+            {error && (
+              <p className="text-sm text-destructive">{error.message}</p>
+            )}
             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
               Or use
             </FieldSeparator>
