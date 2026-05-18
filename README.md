@@ -32,15 +32,18 @@ curl http://localhost:8080/_info
 
 Все переменные описаны в `.env.example`. Значимые:
 
-| Переменная          | По умолчанию | Описание                        |
-|---------------------|--------------|---------------------------------|
-| `BACKEND_PORT`      | `8080`       | Порт backend внутри контейнера  |
-| `CLIENT_PORT`       | `3000`       | Внешний порт frontend           |
-| `DATABASE_PORT`     | `5432`       | Внешний порт PostgreSQL         |
-| `JWT_SECRET`        | `secret`     | Секрет для подписи JWT          |
-| `POSTGRES_USER`     | `postgres`   |                                 |
-| `POSTGRES_PASSWORD` | `password`   |                                 |
-| `POSTGRES_DB`       | `postgres`   |                                 |
+| Переменная              | По умолчанию              | Описание                                    |
+|-------------------------|---------------------------|---------------------------------------------|
+| `BACKEND_PORT`          | `8080`                    | Порт backend внутри контейнера              |
+| `CLIENT_PORT`           | `3000`                    | Внешний порт frontend                       |
+| `DATABASE_PORT`         | `5432`                    | Внешний порт PostgreSQL                     |
+| `JWT_SECRET`            | `secret`                  | Секрет для подписи JWT                      |
+| `PROVIDERS_CONFIG_PATH` | `./backend/providers.yml` | Путь до конфига LLM-провайдеров             |
+| `POSTGRES_USER`         | `postgres`                |                                              |
+| `POSTGRES_PASSWORD`     | `password`                |                                              |
+| `POSTGRES_DB`           | `postgres`                |                                              |
+
+API-ключи провайдеров задаются через переменные окружения, имена которых указаны в `providers.yml` (поле `api_key_env`). Сами ключи **никогда** не хранятся в конфиг-файле.
 
 ## Авторизация
 
@@ -75,6 +78,7 @@ curl -X POST http://localhost:8080/dummyLogin \
 
 | Метод | Путь                            | Роль    | Описание                      |
 |-------|---------------------------------|---------|-------------------------------|
+| GET   | `/providers`                    | any     | Список LLM-провайдеров        |
 | GET   | `/categories`                   | any     | Список категорий              |
 | POST  | `/categories`                   | admin   | Создать категорию             |
 | GET   | `/assistants`                   | any     | Список ассистентов            |
@@ -115,6 +119,7 @@ erDiagram
     TEXT system_prompt
     TEXT example_user_prompt
     BOOLEAN is_active
+    VARCHAR provider_name
     TIMESTAMPTZ created_at
     TIMESTAMPTZ updated_at
   }
@@ -160,23 +165,54 @@ API-слой разделён на три уровня: `fetcher` (HTTP + обр
 
 ### LLM Provider
 
-Интерфейс провайдера объявлен в домене:
+Провайдеры настраиваются декларативно через `providers.yml`. Backend при старте парсит этот файл, создаёт экземпляры провайдеров и регистрирует их в `ProviderRegistry`. Каждый ассистент может использовать свой провайдер — имя провайдера хранится в колонке `provider_name`.
+
+Интерфейс провайдера в домене:
 
 ```go
 type LLMProvider interface {
-    Complete(ctx context.Context, req LLMRequest) (LLMResponse, error)
+    Complete(ctx context.Context, req LLMRequest) LLMResponse
+    CompleteStream(ctx context.Context, req LLMRequest) LLMResponseStream
+}
+
+type ProviderRegistry interface {
+    Get(name string) (LLMProvider, error)
+    Exists(name string) bool
 }
 ```
 
-Текущая реализация — `mock`, отвечает детерминированно:
+**Конфиг провайдеров** (`backend/providers.yml`):
 
+```yaml
+providers:
+  - name: mock
+    type: mock
+    models:
+      - mock-model
+
+  - name: deepseek
+    type: openai
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    models:
+      - deepseek-chat
+      - deepseek-reasoner
 ```
-[mock] model=<model> | <userPrompt>
-```
 
-Для подключения OpenAI-совместимого провайдера достаточно переключить переменную `LLM_PROVIDER=openai` в окружении, а также указать `OPENAI_BASE_URL`, `OPENAI_API_KEY`. Таймаут LLM-вызова — 30 секунд (задаётся через `context.WithTimeout` в `RunService`). 
+**Типы провайдеров:**
+- `mock` — детерминированный, всегда доступен, отвечает в формате `[mock] model=<model> | <userPrompt>`
+- `openai` — OpenAI-совместимый, требует `base_url` и `api_key_env`. Ключ читается из переменной окружения, имя которой указано в `api_key_env`
 
-OpenAI-провайдер проверен на Groq и Gigachat
+**Поведение при старте:**
+- Если конфиг-файл отсутствует или содержит ошибки — backend паникует
+- Если для провайдера не задан API-ключ (env-переменная пуста) — провайдер регистрируется как недоступный (`available: false`), backend продолжает работу
+- Неизвестный тип провайдера — логируется и пропускается
+
+Таймаут LLM-вызова — 30 секунд (задаётся через `context.WithTimeout` в `RunService`).
+
+Список провайдеров доступен через `GET /providers` — возвращает имя, тип, список моделей и флаг доступности каждого провайдера. Фронтенд использует этот эндпоинт для отображения выпадающих списков провайдера и модели в форме создания/редактирования ассистента.
+
+OpenAI-провайдер проверен на Groq, Gigachat и DeepSeek
 
 ## Поведение запуска ассистента
 
@@ -300,7 +336,7 @@ GitHub Actions запускает при каждом пуше и PR в `main`:
 - [x] **Покрытие тестами:** Увеличение покрытия юнит-тестами бизнес-логики до 80%+ и внедрение нагрузочного тестирования, чтобы убедиться что приложение соответствует требованиям по RPS и SLI.
 
 ### Medium Priority
-- [ ] **Гибкая настройка LLM:** Реализация сущности `Provider` в БД. Переход от фича-флагов к возможности динамически выбирать провайдера (OpenAI, GigaChat, Mock, etc) для каждого ассистента индивидуально.
+- [x] **Гибкая настройка LLM:** Реализация динамического выбора провайдера. Провайдеры настраиваются в `providers.yml`, каждый ассистент может использовать свой провайдер (Mock, DeepSeek, OpenAI-совместимые).
 - [ ] **Улучшение UX поиска и навигации:** 
   - [x] Переход от строгого полнотекстового поиска к поиску по частичным вхождениям (улучшение UX при опечатках).
   - [ ] Внедрение системы тегов для гибкой фильтрации ассистентов в каталоге.
