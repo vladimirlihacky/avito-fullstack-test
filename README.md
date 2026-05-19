@@ -2,6 +2,9 @@
 
 Fullstack-приложение для каталога AI-ассистентов. Backend на Go, frontend SPA на React.
 
+> [!TIP]
+> Не хотите ковыряться в репозитории ручками? Задайте вопрос [ассистенту](http://185.112.101.92 )! 
+
 ## Стек
 
 **Backend:** Go · PostgreSQL · JWT · chi router  
