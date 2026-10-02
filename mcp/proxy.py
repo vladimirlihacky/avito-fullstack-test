@@ -1,18 +1,4 @@
 #!/usr/bin/env python3
-"""OpenAI-compatible proxy that enriches LLM requests with filesystem tools.
-
-Self-contained — tools are embedded directly (synchronous execution).
-The MCP server (server.py) is a standalone reference and can be used by
-other MCP clients; this proxy does NOT depend on it at runtime.
-
-Flow:
-  Incoming /v1/chat/completions request
-    -> add tool definitions
-    -> forward to upstream LLM (e.g. DeepSeek)
-    -> if LLM returns tool_calls: execute locally, feed results back, repeat
-    -> return final text-only response
-"""
-
 import json
 import os
 import re
@@ -35,7 +21,6 @@ PROJECT_ROOT = Path(os.environ.get("MCP_PROJECT_ROOT", os.getcwd())).resolve()
 IGNORED_DIRS = {".git", "node_modules", "__pycache__", ".venv", "dist", "build"}
 MAX_FILE_SIZE = 50_000
 
-# Files that must never be exposed — secrets, credentials, private keys
 DENY_FILES = {
     ".env", ".env.local", ".env.production", ".env.development",
     "credentials.json", "service-account.json", ".htpasswd",
@@ -274,7 +259,6 @@ async def run_with_tools(
 
 
 def _sse_chunk(model: str, content: str = "", role: str = "", finish: bool = False) -> str:
-    """Build a single SSE data line for an OpenAI-compatible streaming chunk."""
     delta: dict = {}
     if role:
         delta["role"] = role
@@ -295,8 +279,6 @@ def _sse_chunk(model: str, content: str = "", role: str = "", finish: bool = Fal
 
 
 async def _stream_response(model: str, output: str):
-    """Yield SSE chunks line-by-line so downstream receives incremental chunks.
-    No trailing newlines — the consumer adds separators."""
     yield _sse_chunk(model, role="assistant")
     for line in output.split("\n"):
         yield _sse_chunk(model, content=line)

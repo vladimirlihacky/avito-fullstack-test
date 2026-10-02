@@ -33,7 +33,6 @@ def _resolve(path: str) -> Path:
 
 
 def _build_project_tree(root: Path, prefix: str = "", max_depth: int = 3) -> str:
-    """Return a compact directory tree up to max_depth."""
     if max_depth == 0:
         return ""
     lines = []
@@ -172,7 +171,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             out = result.stdout.strip()
             if not out:
                 return [TextContent(type="text", text=f"No matches found for: {query}")]
-            # Truncate if too much output
             if len(out) > 8000:
                 out = out[:8000] + "\n... (truncated)"
             return [TextContent(type="text", text=out)]
